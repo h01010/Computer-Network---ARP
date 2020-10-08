@@ -110,10 +110,10 @@ public class LayerManager {
 				else if(pNode.token.equals(")"))
 					Pop();
 				else{
-					char cMode = pNode.token.charAt(0);
-					String pcName = pNode.token.substring(1, pNode.token.length());
+					char cMode = pNode.token.charAt(0); //*GUI -> *
+					String pcName = pNode.token.substring(1, pNode.token.length()); //*GUI -> GUI
 					
-					pLayer = GetLayer (pcName);
+					pLayer = GetLayer (pcName); //Name으로 Layer 가져오기
 					
 					switch(cMode){
 					case '*':
@@ -135,7 +135,7 @@ public class LayerManager {
 	}
 	
 	public void DeAllocLayer(){
-			
+		mp_sListHead.next = null;	// 처음 head의 next만 끊어준다면 가바지컬렉터가 작동할까? (궁금증)
 	}
 
 	
