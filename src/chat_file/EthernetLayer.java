@@ -115,7 +115,7 @@ public class EthernetLayer implements BaseLayer {
 		// AND연산 결과를 저장할 임시 배열
 		byte[] AND_result = new byte[6];
 
-		for (int i = 6; i > 12; i++) {
+		for (int i = 6; i < 12; i++) {
 			AND_result[i - 6] = (byte) (this.mac_addr[i - 6] & input[i]);
 		}
 		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
@@ -128,7 +128,7 @@ public class EthernetLayer implements BaseLayer {
 		// AND연산 결과를 저장할 임시 배열
 		byte[] AND_result = new byte[6];
 
-		for (int i = 0; i > 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
 		}
 		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
@@ -141,7 +141,7 @@ public class EthernetLayer implements BaseLayer {
 		// AND연산 결과를 저장할 임시 배열
 		byte[] AND_result = new byte[6];
 
-		for (int i = 0; i > 6; i++) {
+		for (int i = 0; i < 6; i++) {
 			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
 		}
 		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
