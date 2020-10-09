@@ -1,5 +1,6 @@
 package chat_file;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.sql.Date;
 import java.util.ArrayList;
@@ -39,6 +40,16 @@ public class NILayer implements BaseLayer {
 		int flags = Pcap.MODE_PROMISCUOUS; // capture all packets
 		int timeout = 10 * 1000; // 10 seconds in millis
 		m_AdapterObject = Pcap.openLive(m_pAdapterList.get(m_iNumAdapter).getName(), snaplen, flags, timeout, errbuf);
+	}
+	
+	public byte[] getMacAddress() {	//ethernetLayer에서 사용하여 macAddress를 가져올 함수
+		byte[] macAddress = null;
+		try {
+			result = m_pAdapterList.get(0).getHardwareAddress();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		return macAddress;
 	}
 
 	public PcapIf GetAdapterObject(int iIndex) {
@@ -91,7 +102,6 @@ public class NILayer implements BaseLayer {
 		if (pUpperLayer == null)
 			return;
 		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
-		// nUpperLayerCount++;
 	}
 
 	@Override
@@ -129,7 +139,6 @@ class Receive_Thread implements Runnable {
 	BaseLayer UpperLayer;
 
 	public Receive_Thread(Pcap m_AdapterObject, BaseLayer m_UpperLayer) {
-		// TODO Auto-generated constructor stub
 		AdapterObject = m_AdapterObject;
 		UpperLayer = m_UpperLayer;
 	}
