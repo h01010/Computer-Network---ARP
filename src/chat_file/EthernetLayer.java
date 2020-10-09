@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -13,6 +15,7 @@ public class EthernetLayer implements BaseLayer {
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
+	private byte[] mac_addr;
 
 	private class _ETHERNET_ADDR {
 		private byte[] addr = new byte[6];
@@ -47,31 +50,125 @@ public class EthernetLayer implements BaseLayer {
 		// super(pName);
 		// TODO Auto-generated constructor stub
 		pLayerName = pName;
-		
+
+		try {
+			InetAddress ip = InetAddress.getLocalHost();
+			NetworkInterface mac = NetworkInterface.getByInetAddress(ip);
+			this.mac_addr = mac.getHardwareAddress();
+
+		} catch (Exception e) {
+			System.out.println("EthernetLayer Error : Can't read MAC address.\n" + e.getMessage());
+		}
 	}
 
+	public byte[] ObjToByte(_ETHERNET_HEADER Header, byte[] input, int length) {// data에 헤더 붙여주기
+		byte[] buf = new byte[length + 14];
+		for (int i = 0; i < 6; i++) {
+			buf[i] = Header.enet_dstaddr.addr[i];
+			buf[i + 6] = Header.enet_srcaddr.addr[i];
+		}
+		buf[12] = Header.enet_type[0];
+		buf[13] = Header.enet_type[1];
+		for (int i = 0; i < length; i++)
+			buf[14 + i] = input[i];
+
+		return buf;
+	}
 
 	public boolean Send(byte[] input, int length) {
-	
+		byte[] bytes = ObjToByte(m_sHeader, input, length);
+		this.GetUnderLayer().Send(bytes, length + 14);
 
 		return false;
 	}
 
-	
-
 	public boolean Receive(byte[] input) {
-		
+		byte[] data;
+		boolean MyPacket, Mine, Broadcast;
+		MyPacket = IsItMyPacket(input);
+
+		if (MyPacket == true) { // 본인이 송신한 패킷인 경우
+			return false;
+		} else {
+			Broadcast = IsItBroadcast(input);
+			if (Broadcast == false) { // Broadcast 아니면서
+				Mine = IsItMine(input);
+				if (Mine == false) { // 목적지가 자신이 아닌 경우
+					return false;
+				}
+			}
+		}
+
+		// Broadcast 혹은 자신이 목적지인 경우
+		// 0x0820 = ChatAppLayer; //0x0830 = FileAppLayer;
+		if (input[12] == 0x08 && input[13] == 0x02) {
+			data = this.RemoveEthernetHeader(input, input.length);
+			this.GetUpperLayer(0).Receive(data);
+		} else if (input[12] == 0x08 && input[13] == 0x02) {
+			data = this.RemoveEthernetHeader(input, input.length);
+			this.GetUpperLayer(1).Receive(data);
+		}
 		return true;
+	}
+
+	private boolean IsItMyPacket(byte[] input) {
+		// AND연산 결과를 저장할 임시 배열
+		byte[] AND_result = new byte[6];
+
+		for (int i = 6; i > 12; i++) {
+			AND_result[i - 6] = (byte) (this.mac_addr[i - 6] & input[i]);
+		}
+		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean IsItBroadcast(byte[] input) {
+		// AND연산 결과를 저장할 임시 배열
+		byte[] AND_result = new byte[6];
+
+		for (int i = 0; i > 6; i++) {
+			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
+		}
+		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
+			return true;
+		}
+		return false;
+	}
+
+	private boolean IsItMine(byte[] input) {
+		// AND연산 결과를 저장할 임시 배열
+		byte[] AND_result = new byte[6];
+
+		for (int i = 0; i > 6; i++) {
+			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
+		}
+		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
+			return true;
+		}
+		return false;
+	}
+
+	public byte[] RemoveEthernetHeader(byte[] input, int length) {
+		byte[] cpyInput = new byte[length - 14];
+		System.arraycopy(input, 14, cpyInput, 0, length - 14);
+		input = cpyInput;
+		return input;
 	}
 
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
-	
+		if (pUnderLayer == null)
+			return;
+		this.p_UnderLayer = pUnderLayer;
 	}
 
 	@Override
 	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		
+		if (pUpperLayer == null)
+			return;
+		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
 	}
 
 	@Override
@@ -82,17 +179,21 @@ public class EthernetLayer implements BaseLayer {
 
 	@Override
 	public BaseLayer GetUnderLayer() {
-		return  null;
+		if (this.p_UnderLayer == null)
+			return null;
+		return this.p_UnderLayer;
 	}
 
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		return null;
+		if (nindex < 0 || nindex > this.nUpperLayerCount || this.nUpperLayerCount < 0)
+			return null;
+		return this.p_aUpperLayer.get(nindex);
 	}
 
 	@Override
 	public void SetUpperUnderLayer(BaseLayer pUULayer) {
-		
-
+		this.SetUpperLayer(pUULayer);
+		pUULayer.SetUnderLayer(this);
 	}
 }
