@@ -80,9 +80,13 @@ public class TCPLayer implements BaseLayer{
 
 	public boolean Receive(byte[] input) {
 		byte[] data = this.RemoveTCPHeader(input, input.length);
-		this.GetUpperLayer(0).Receive(data);
-		return false;
+		if(input[2] == 0x08 && input[3] == 0x20) {
+			this.GetUpperLayer(0).Receive(data);
+		}else if(input[2] == 0x08 && input[3] == 0x20) {
+			this.GetUpperLayer(1).Receive(data);
 		}
+		return false;
+	}
 	
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
