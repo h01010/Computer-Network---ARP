@@ -156,6 +156,14 @@ public class EthernetLayer implements BaseLayer {
 		input = cpyInput;
 		return input;
 	}
+	
+	public void SetEnetSrcAddress(byte[] srcAddress) {
+		m_sHeader.enet_srcaddr.addr = srcAddress;
+	}
+
+	public void SetEnetDstAddress(byte[] dstAddress) {
+		m_sHeader.enet_dstaddr.addr = dstAddress;
+	}
 
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
