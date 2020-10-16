@@ -105,8 +105,8 @@ public class EthernetLayer implements BaseLayer {
 			data = this.RemoveEthernetHeader(input, input.length);
 			this.GetUpperLayer(0).Receive(data);
 		} else if (input[12] == 0x08 && input[13] == 0x06) {
-			data = this.RemoveEthernetHeader(input, input.length);
-			this.GetUpperLayer(1).Receive(data);
+			//data = this.RemoveEthernetHeader(input, input.length);
+			this.GetUpperLayer(1).Receive(input);
 		}
 		return true;
 	}
