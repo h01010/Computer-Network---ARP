@@ -100,11 +100,11 @@ public class EthernetLayer implements BaseLayer {
 		}
 
 		// Broadcast 혹은 자신이 목적지인 경우
-		// 0x0820 = ChatAppLayer; //0x0830 = FileAppLayer;
-		if (input[12] == 0x08 && input[13] == 0x02) {
+		// 0x0800 = IPLayer; //0x0830 = ARPLayer;
+		if (input[12] == 0x08 && input[13] == 0x00) {
 			data = this.RemoveEthernetHeader(input, input.length);
 			this.GetUpperLayer(0).Receive(data);
-		} else if (input[12] == 0x08 && input[13] == 0x02) {
+		} else if (input[12] == 0x08 && input[13] == 0x06) {
 			data = this.RemoveEthernetHeader(input, input.length);
 			this.GetUpperLayer(1).Receive(data);
 		}
