@@ -76,12 +76,26 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	public boolean Send(byte[] input, int length) {
+		boolean isItRequest = true;
+		for(int i=0; i<6; i++) {
+			if( 0xff != m_sHeader.enet_srcaddr.addr[i]) {
+				isItRequest = false;
+				break;
+			}
+		}
+		if(isItRequest) {	//Broadcast인 경우. 해당 패킷은 이후 ARPLayer로 올린다 
+			m_sHeader.enet_type[0] = 0x08;
+			m_sHeader.enet_type[1] = 0x00;
+		}else{				//목적지 MAC주소가 있는 경우 해당 패킷은 이후 IPLayer로 올린다
+			m_sHeader.enet_type[0] = 0x08;
+			m_sHeader.enet_type[1] = 0x30;
+		}
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		this.GetUnderLayer().Send(bytes, length + 14);
-
+		
 		return false;
 	}
-
+	
 	public boolean Receive(byte[] input) {
 		byte[] data;
 		boolean MyPacket, Mine, Broadcast;
