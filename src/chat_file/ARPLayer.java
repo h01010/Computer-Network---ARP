@@ -75,13 +75,13 @@ public class ARPLayer implements BaseLayer{
 	}
 	
 	public class _ARP_CACHE {
-		String Interface;
+		// String Interface;
 		byte[] IPAddress = new byte[4];
 		byte[] MACAddress = new byte[6];
 		boolean Status;
 		
 		public _ARP_CACHE() {
-			this.Interface = "hme0";
+			// this.Interface = "hme0";
 			this.Status = false;
 		}
 	}
@@ -106,6 +106,7 @@ public class ARPLayer implements BaseLayer{
 		// Send는 보내기만 하므로 항상 0x0001로 고정해도 될 것 같다.
 		arpheader.setOpcode(0x0001);
 		
+		//ARP CACHE 활용 부분
 		
 		byte[] buf = ObjToByte(arpheader, input, length);
 		this.GetUnderLayer().Send(buf, buf.length);
@@ -145,8 +146,6 @@ public class ARPLayer implements BaseLayer{
 			
 			
 		}
-		
-		
 		return true;
 	}
 	

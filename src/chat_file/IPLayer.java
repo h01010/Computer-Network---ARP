@@ -60,7 +60,7 @@ public class IPLayer implements BaseLayer {
         this.m_iHeader.setDest(dest);
     }
 
-    public void setm_EthernetLayer(EthernetLayer m_EthernetLayer) {
+    public void setEthernetLayer(EthernetLayer m_EthernetLayer) {
         this.m_EthernetLayer = m_EthernetLayer;
     }
 

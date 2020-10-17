@@ -23,7 +23,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-
+	
 	String path;
 
 	private static LayerManager m_LayerMgr = new LayerManager();
@@ -52,6 +52,10 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	FileDialog fd;
 
 	public static void main(String[] args) {
+		/*
+		 * Layer 연결 순서 절대 바꾸지 말 것!!!
+		 * 만일 어떠한 이유로 바꿔야 한다면 바꾸고 꼭 말할것!!!
+		 */
 		m_LayerMgr.AddLayer(new ChatFileDlg("GUI"));
 		m_LayerMgr.AddLayer(new ChatAppLayer("CHAT"));
 		//m_LayerMgr.AddLayer(new FileLayer("FILE"));
@@ -60,8 +64,8 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		m_LayerMgr.AddLayer(new ARPLayer("ARP"));
 		m_LayerMgr.AddLayer(new EthernetLayer("ETH"));
 		m_LayerMgr.AddLayer(new NILayer("NI"));
-		m_LayerMgr.ConnectLayers("NI ( *ETH ( +IP ( *TCP ( *CHAT ( *GUI ) ");
-		// m_LayerMgr.ConnectLayers("NI ( *Eth ( +IP ( *TCP ( *CHAT ( *GUI ) *FILE ( *GUI )");
+		m_LayerMgr.ConnectLayers("NI ( *ETH ( +IP ( *TCP ( *CHAT ( *GUI ) ) ) ) ) ");
+		// m_LayerMgr.ConnectLayers("NI ( *ETH ( +IP ( *TCP ( *CHAT ( *GUI ) *FILE ( *GUI )");
 		
 		m_LayerMgr.GetLayer("IP").SetUnderLayer(m_LayerMgr.GetLayer("ARP"));
 		m_LayerMgr.GetLayer("ETH").SetUpperUnderLayer(m_LayerMgr.GetLayer("ARP"));
