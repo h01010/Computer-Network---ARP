@@ -73,16 +73,26 @@ public class TCPLayer implements BaseLayer{
 		return input;
 	}
 	
-	public boolean Send(byte[] input, int length) {
+	public boolean Send(byte[] input, int length) {	//ChatAppLayer에서 TCP Layer 호출 시의 함수
+		m_sHeader.tcp_dport[0] = 0x08;
+		m_sHeader.tcp_dport[1] = 0x20;
+		byte[] bytes = ObjToByte(m_sHeader, input, length);
+		return this.GetUnderLayer().Send(bytes, length + 24);
+	}
+	public boolean FileSend(byte[] input, int length) { 	//FileAppLayer에서 TCP Layer 호출 시의 함수
+		m_sHeader.tcp_dport[0] = 0x08;
+		m_sHeader.tcp_dport[1] = 0x30;
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		return this.GetUnderLayer().Send(bytes, length + 24);
 	}
 
 	public boolean Receive(byte[] input) {
 		byte[] data = this.RemoveTCPHeader(input, input.length);
+		
+		// tcp_dport = 0x0820 : ChatAppLayer; tcp_dport = 0x0830 : FileAppLayer; 
 		if(input[2] == 0x08 && input[3] == 0x20) {
 			this.GetUpperLayer(0).Receive(data);
-		}else if(input[2] == 0x08 && input[3] == 0x20) {
+		}else if(input[2] == 0x08 && input[3] == 0x30) {
 			this.GetUpperLayer(1).Receive(data);
 		}
 		return false;
