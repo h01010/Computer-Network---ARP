@@ -78,7 +78,7 @@ public class EthernetLayer implements BaseLayer {
 	public boolean Send(byte[] input, int length) {
 		boolean isItRequest = true;
 		for(int i=0; i<6; i++) {
-			if( 0xff != m_sHeader.enet_srcaddr.addr[i]) {
+			if( 0xff != m_sHeader.enet_dstaddr.addr[i]) {
 				isItRequest = false;
 				break;
 			}
