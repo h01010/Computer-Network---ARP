@@ -45,7 +45,7 @@ public class NILayer implements BaseLayer {
 	public byte[] getMacAddress() {	//ethernetLayer에서 사용하여 macAddress를 가져올 함수
 		byte[] macAddress = null;
 		try {
-			result = m_pAdapterList.get(0).getHardwareAddress();
+			macAddress = m_pAdapterList.get(0).getHardwareAddress();
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
