@@ -1,21 +1,25 @@
-package chat_file;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.nio.ByteBuffer;
+
 import java.util.ArrayList;
 
 public class EthernetLayer implements BaseLayer {
+
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-	private byte[] mac_addr;
+	_ETHERNET_Frame m_sHeader;
+
+	public EthernetLayer(String pName) {
+		// super(pName);
+		// TODO Auto-generated constructor stub
+		pLayerName = pName;
+		ResetHeader();
+	}
+
+	public void ResetHeader() {
+		m_sHeader = new _ETHERNET_Frame();
+	}
 
 	private class _ETHERNET_ADDR {
 		private byte[] addr = new byte[6];
@@ -27,16 +31,17 @@ public class EthernetLayer implements BaseLayer {
 			this.addr[3] = (byte) 0x00;
 			this.addr[4] = (byte) 0x00;
 			this.addr[5] = (byte) 0x00;
+
 		}
 	}
 
-	private class _ETHERNET_HEADER {
+	private class _ETHERNET_Frame {
 		_ETHERNET_ADDR enet_dstaddr;
 		_ETHERNET_ADDR enet_srcaddr;
 		byte[] enet_type;
 		byte[] enet_data;
 
-		public _ETHERNET_HEADER() {
+		public _ETHERNET_Frame() {
 			this.enet_dstaddr = new _ETHERNET_ADDR();
 			this.enet_srcaddr = new _ETHERNET_ADDR();
 			this.enet_type = new byte[2];
@@ -44,24 +49,7 @@ public class EthernetLayer implements BaseLayer {
 		}
 	}
 
-	_ETHERNET_HEADER m_sHeader = new _ETHERNET_HEADER();
-
-	public EthernetLayer(String pName) {
-		// super(pName);
-		// TODO Auto-generated constructor stub
-		pLayerName = pName;
-
-		try {
-			InetAddress ip = InetAddress.getLocalHost();
-			NetworkInterface mac = NetworkInterface.getByInetAddress(ip);
-			this.mac_addr = mac.getHardwareAddress();
-
-		} catch (Exception e) {
-			System.out.println("EthernetLayer Error : Can't read MAC address.\n" + e.getMessage());
-		}
-	}
-
-	public byte[] ObjToByte(_ETHERNET_HEADER Header, byte[] input, int length) {// dataø° «Ï¥ı ∫Ÿø©¡÷±‚
+	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// dataÏóê Ìó§Îçî Î∂ôÏó¨Ï£ºÍ∏∞
 		byte[] buf = new byte[length + 14];
 		for (int i = 0; i < 6; i++) {
 			buf[i] = Header.enet_dstaddr.addr[i];
@@ -75,93 +63,15 @@ public class EthernetLayer implements BaseLayer {
 		return buf;
 	}
 
+	// Î∏åÎ°úÎìú Ï∫êÏä§Ìä∏Ïùº Í≤ΩÏö∞, typeÏù¥ 0xff
 	public boolean Send(byte[] input, int length) {
-		boolean isItRequest = true;
-		for(int i=0; i<6; i++) {
-			if( 0xff != m_sHeader.enet_dstaddr.addr[i]) {
-				isItRequest = false;
-				break;
-			}
-		}
-		if(isItRequest) {	//Broadcast¿Œ ∞ÊøÏ. «ÿ¥Á ∆–≈∂¿∫ ¿Ã»ƒ ARPLayer∑Œ ø√∏∞¥Ÿ 
-			m_sHeader.enet_type[0] = 0x08;
-			m_sHeader.enet_type[1] = 0x00;
-		}else{				//∏Ò¿˚¡ˆ MAC¡÷º“∞° ¿÷¥¬ ∞ÊøÏ «ÿ¥Á ∆–≈∂¿∫ ¿Ã»ƒ IPLayer∑Œ ø√∏∞¥Ÿ
-			m_sHeader.enet_type[0] = 0x08;
-			m_sHeader.enet_type[1] = 0x30;
-		}
+		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
+			m_sHeader.enet_type = intToByte2(0x01ff);
+		else // nomal
+			m_sHeader.enet_type = intToByte2(0x0101);
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		this.GetUnderLayer().Send(bytes, length + 14);
-		
-		return false;
-	}
-	
-	public boolean Receive(byte[] input) {
-		byte[] data;
-		boolean MyPacket, Mine, Broadcast;
-		MyPacket = IsItMyPacket(input);
-
-		if (MyPacket == true) { // ∫ª¿Œ¿Ã º€Ω≈«— ∆–≈∂¿Œ ∞ÊøÏ
-			return false;
-		} else {
-			Broadcast = IsItBroadcast(input);
-			if (Broadcast == false) { // Broadcast æ∆¥œ∏Èº≠
-				Mine = IsItMine(input);
-				if (Mine == false) { // ∏Ò¿˚¡ˆ∞° ¿⁄Ω≈¿Ã æ∆¥— ∞ÊøÏ
-					return false;
-				}
-			}
-		}
-
-		// Broadcast »§¿∫ ¿⁄Ω≈¿Ã ∏Ò¿˚¡ˆ¿Œ ∞ÊøÏ
-		// 0x0800 = IPLayer; //0x0830 = ARPLayer;
-		if (input[12] == 0x08 && input[13] == 0x00) {
-			data = this.RemoveEthernetHeader(input, input.length);
-			this.GetUpperLayer(0).Receive(data);
-		} else if (input[12] == 0x08 && input[13] == 0x06) {
-			data = this.RemoveEthernetHeader(input, input.length);
-			this.GetUpperLayer(1).Receive(data);
-		}
 		return true;
-	}
-
-	private boolean IsItMyPacket(byte[] input) {
-		// ANDø¨ªÍ ∞·∞˙∏¶ ¿˙¿Â«“ ¿”Ω√ πËø≠
-		byte[] AND_result = new byte[6];
-
-		for (int i = 6; i < 12; i++) {
-			AND_result[i - 6] = (byte) (this.mac_addr[i - 6] & input[i]);
-		}
-		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean IsItBroadcast(byte[] input) {
-		// ANDø¨ªÍ ∞·∞˙∏¶ ¿˙¿Â«“ ¿”Ω√ πËø≠
-		byte[] AND_result = new byte[6];
-
-		for (int i = 0; i < 6; i++) {
-			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
-		}
-		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
-			return true;
-		}
-		return false;
-	}
-
-	private boolean IsItMine(byte[] input) {
-		// ANDø¨ªÍ ∞·∞˙∏¶ ¿˙¿Â«“ ¿”Ω√ πËø≠
-		byte[] AND_result = new byte[6];
-
-		for (int i = 0; i < 6; i++) {
-			AND_result[i] = (byte) (this.mac_addr[i] & input[i]);
-		}
-		if (java.util.Arrays.equals(this.mac_addr, AND_result)) {
-			return true;
-		}
-		return false;
 	}
 
 	public byte[] RemoveEthernetHeader(byte[] input, int length) {
@@ -170,27 +80,86 @@ public class EthernetLayer implements BaseLayer {
 		input = cpyInput;
 		return input;
 	}
-	
+
+	public boolean fileSend(byte[] input, int length) {
+		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
+			m_sHeader.enet_type = intToByte2(0x02ff);
+		else // nomal
+			m_sHeader.enet_type = intToByte2(0x0201);
+		byte[] bytes = ObjToByte(m_sHeader, input, length);
+		this.GetUnderLayer().Send(bytes, length + 14);
+		return true;
+	}
+
+	public synchronized boolean Receive(byte[] input) {
+		byte[] data;
+		byte[] temp_src = m_sHeader.enet_srcaddr.addr;
+		int temp_type = byte2ToInt(input[12], input[13]);
+
+		if (temp_type < 0x0200) {
+			if (temp_type == 0x0101) {
+				if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
+					data = this.RemoveEthernetHeader(input, input.length);
+					this.GetUpperLayer(0).Receive(data);
+					return true;
+				}
+			}
+			return false;
+		}else if (temp_type < 0x0300) {
+			if (temp_type == 0x0201) {
+				if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
+					data = this.RemoveEthernetHeader(input, input.length);
+					this.GetUpperLayer(1).Receive(data);
+					return true;
+				}
+			}
+			return false; 
+		}
+		return false;
+	}
+
+	private byte[] intToByte2(int value) {
+		byte[] temp = new byte[2];
+		temp[0] |= (byte) ((value & 0xFF00) >> 8);
+		temp[1] |= (byte) (value & 0xFF);
+
+		return temp;
+	}
+
+	private int byte2ToInt(byte value1, byte value2) {
+		return (int) ((value1 << 8) | (value2));
+	}
+
+	private boolean isBroadcast(byte[] bytes) {
+		for (int i = 0; i < 6; i++)
+			if (bytes[i] != (byte) 0xff)
+				return false;
+		return (bytes[12] == (byte) 0xff && bytes[13] == (byte) 0xff);
+	}
+
+	private boolean isMyPacket(byte[] input) {
+		for (int i = 0; i < 6; i++)
+			if (m_sHeader.enet_srcaddr.addr[i] != input[6 + i])
+				return false;
+		return true;
+	}
+
+	private boolean chkAddr(byte[] input) {
+		byte[] temp = m_sHeader.enet_srcaddr.addr;
+		for (int i = 0; i < 6; i++)
+			if (m_sHeader.enet_srcaddr.addr[i] != input[i])
+				return false;
+		return true;
+	}
+
 	public void SetEnetSrcAddress(byte[] srcAddress) {
+		// TODO Auto-generated method stub
 		m_sHeader.enet_srcaddr.addr = srcAddress;
 	}
 
 	public void SetEnetDstAddress(byte[] dstAddress) {
+		// TODO Auto-generated method stub
 		m_sHeader.enet_dstaddr.addr = dstAddress;
-	}
-
-	@Override
-	public void SetUnderLayer(BaseLayer pUnderLayer) {
-		if (pUnderLayer == null)
-			return;
-		this.p_UnderLayer = pUnderLayer;
-	}
-
-	@Override
-	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		if (pUpperLayer == null)
-			return;
-		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
 	}
 
 	@Override
@@ -201,16 +170,34 @@ public class EthernetLayer implements BaseLayer {
 
 	@Override
 	public BaseLayer GetUnderLayer() {
-		if (this.p_UnderLayer == null)
+		// TODO Auto-generated method stub
+		if (p_UnderLayer == null)
 			return null;
-		return this.p_UnderLayer;
+		return p_UnderLayer;
 	}
 
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		if (nindex < 0 || nindex > this.nUpperLayerCount || this.nUpperLayerCount < 0)
+		// TODO Auto-generated method stub
+		if (nindex < 0 || nindex > nUpperLayerCount || nUpperLayerCount < 0)
 			return null;
-		return this.p_aUpperLayer.get(nindex);
+		return p_aUpperLayer.get(nindex);
+	}
+
+	@Override
+	public void SetUnderLayer(BaseLayer pUnderLayer) {
+		// TODO Auto-generated method stub
+		if (pUnderLayer == null)
+			return;
+		this.p_UnderLayer = pUnderLayer;
+	}
+
+	@Override
+	public void SetUpperLayer(BaseLayer pUpperLayer) {
+		// TODO Auto-generated method stub
+		if (pUpperLayer == null)
+			return;
+		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
 	}
 
 	@Override
