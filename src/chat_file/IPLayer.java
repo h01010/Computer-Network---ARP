@@ -88,7 +88,7 @@ public class IPLayer implements BaseLayer {
 	 * This method will switch object to byte
 	 * @return {byte} swapped byte
 	 */
-    public byte[] ObjectToByte(byte[] input, int length){
+    public byte[] ObjToByte(byte[] input, int length){
         byte[] buffer = new byte[length + HeaderSize];
         int beforeHeaderSize = 0;
         
@@ -217,10 +217,22 @@ public class IPLayer implements BaseLayer {
 		pUULayer.SetUnderLayer(this);
 	}
 	
+	/**
+	 * This method will send packet to upper layer
+	 */
 	public boolean Send(byte[] input, int length) {
-		return false;
+        byte[] buf = ObjToByte(input, input.length);
+
+        if(length == 0){
+            return this.GetUnderLayer().Send(buf, buf.length);
+        }else{
+            return m_EthernetLayer.Send(buf, buf.length);
+        }
 	}
 	
+	/**
+	 * This method will send packet to under layer
+	 */
 	public synchronized boolean Receive(byte[] input) {
 		return false;
 	}
