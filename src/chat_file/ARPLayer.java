@@ -1,6 +1,7 @@
 package chat_file;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
+import java.util.*;
 
 public class ARPLayer implements BaseLayer{
 	
@@ -32,6 +33,12 @@ public class ARPLayer implements BaseLayer{
 			this.ProtocolType[0] = (byte)0x08;	// 0x0800 (IPv4) 0x0806 (ARP)
 			this.HardwareLength[0] = (byte)0x06;	// Ethernet에서는 0x06으로 설정하래 왜 인지는 몰라ㅎㅎ
 			this.ProtocolLength[0] = (byte)0x04;	// IPv4인 경우 0x04로 설정
+			this.DstMac[0] = (byte)0xff;
+			this.DstMac[1] = (byte)0xff;
+			this.DstMac[2] = (byte)0xff;
+			this.DstMac[3] = (byte)0xff;
+			this.DstMac[4] = (byte)0xff;
+			this.DstMac[5] = (byte)0xff;
 		}
 		
 		//Setter
@@ -80,11 +87,51 @@ public class ARPLayer implements BaseLayer{
 		byte[] MACAddress = new byte[6];
 		boolean Status;
 		
-		public _ARP_CACHE() {
-			// this.Interface = "hme0";
-			this.Status = false;
+		public _ARP_CACHE(byte[] ipaddr, byte[] macaddr, boolean status) {
+			this.setIPAddress(ipaddr);
+			this.setMACAddress(macaddr);
+			this.setStatus(status);
+		}
+		
+		public _ARP_CACHE setIPAddress(byte[] ipaddr) {
+			this.IPAddress = ipaddr;
+			return this;
+		}
+		
+		public _ARP_CACHE setMACAddress(byte[] macaddr) {
+			this.MACAddress = macaddr;
+			return this;
+		}
+		
+		public _ARP_CACHE setStatus(boolean status) {
+			this.Status = status;
+			return this;
+		}
+		
+		//비교를 하기 위해 값을 리턴해주는 함수들
+		public byte[] return_IPAddress() {
+			return this.IPAddress;
+		}
+		
+		public byte[] return_MACAddress() {
+			return this.MACAddress;
+		}
+		
+		public boolean return_Status() {
+			return this.Status;
 		}
 	}
+	
+//	public class _ARP_TABLE {
+//		ArrayList<_ARP_CACHE> ARPTable;
+//		int numberOfCache;
+//		public _ARP_TABLE() {
+//			ARPTable = new ArrayList<_ARP_CACHE>();
+//			numberOfCache = 0;
+//		}
+//	}
+	
+	ArrayList<_ARP_CACHE> arpTable = new ArrayList<_ARP_CACHE>();
 	
 	public byte[] ObjToByte(_ARP_HEADER Header, byte[] input, int length) {
 		byte[] buf = new byte[length + 28];	//2, 2, 1, 1, 2, 6, 4, 6, 4 => 28
@@ -102,9 +149,17 @@ public class ARPLayer implements BaseLayer{
 	}
 	
 	public boolean Send(byte[] input, int length) {
-		// 완성 아님!
-		// Send는 보내기만 하므로 항상 0x0001로 고정해도 될 것 같다.
-		arpheader.setOpcode(0x0001);
+		byte[] dstAddress = KnowDstMac(arpheader.DstIP);
+		if (dstAddress != null) {
+			this.GetUnderLayer().SetEnetDstAddress(dstAddress);	//Ethernet Layer SetEnetDstAddress Method
+			arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2를 쓰지 않기 위함
+			arpheader.setDstMac(dstAddress);
+		} else {
+			arpheader.setOpcode(new byte[] {0x00, 0x01});
+			
+			_ARP_CACHE cache = new _ARP_CACHE(arpheader.DstIP, arpheader.DstMac, false);
+			arpTable.add(cache);
+		}
 		
 		//ARP CACHE 활용 부분
 		
@@ -112,43 +167,73 @@ public class ARPLayer implements BaseLayer{
 		this.GetUnderLayer().Send(buf, buf.length);
 		return true;
 	}
-	
+
+	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC 주소를 알고있는지 물어보는 함수
+		Iterator<_ARP_CACHE> iterator = arpTable.iterator();
+		while (iterator.hasNext()) {
+			_ARP_CACHE cache = iterator.next();
+			if (cache.return_IPAddress() == dstIP) {
+				BigInteger bigInt = new BigInteger(cache.return_MACAddress());
+				if (bigInt.intValue() != -1) {									// -1 == 0xffffffff
+					return cache.return_MACAddress();
+				}
+				return null;
+			}
+		}
+		return null;
+	}
+
 	public boolean Receive(byte[] input) {
-		// 완성 아님!
 		byte[] opcode = new byte[2];
 		System.arraycopy(input, 6, opcode, 0, 2);
 		
 		if(opcode[0] == 0x01) {	//request
 			/* 요청하는것을 받았으니까 현재 받은 호스트 입장에서는 Sender Mac, Sender IP를 궁금해 할 것 같다. */
-			byte[] senderMac = new byte[6];
+			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
 			byte[] targetIP = new byte[4];	//swap를 쓰기 위함
 			
-			System.arraycopy(input, 8, senderMac, 0, 6);
+			System.arraycopy(input, 8, senderMAC, 0, 6);
 			System.arraycopy(input, 14, senderIP, 0, 4);
 			System.arraycopy(input, 24, targetIP, 0, 4);
 			
+			
+			_ARP_CACHE cache = new _ARP_CACHE(senderIP, senderMAC, true);
+			arpTable.add(cache);
+			
+			
 			if(targetIP == arpheader.SrcIP) {	//request 메세지를 받았을 때 나에게 온 메세지이면 요청한 호스트에서 나의 mac 주소를 알려주어야함
-				byte[] swapData = swap(input, senderMac, senderIP, arpheader.SrcMac, targetIP);
+				byte[] swapData = swap(input, senderMAC, senderIP, arpheader.SrcMac, targetIP);
 				GetUnderLayer().Send(swapData, swapData.length);
 			}
-			
-			
 		} else {	//opcode[0] == 0x02	reply
 			/* 응답하는 메세지를 받았으니까 현재 받은 호스트 입장에서는  Sender Mac, Sender IP를 궁금해 할 것 같다.
 			 * 왜냐? 그게 궁금해서 보낸거였으니까
 			 * */
-			byte[] senderMac = new byte[6];
+			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
 			
-			System.arraycopy(input, 8, senderMac, 0, 6);
+			System.arraycopy(input, 8, senderMAC, 0, 6);
 			System.arraycopy(input, 14, senderIP, 0, 4);
 			
+			SetDstTrue(senderIP, senderMAC);
 			
 		}
 		return true;
 	}
 	
+	private void SetDstTrue(byte[] senderIP, byte[] senderMAC) {
+		Iterator<_ARP_CACHE> iterator = arpTable.iterator();
+		while (iterator.hasNext()) {
+			_ARP_CACHE cache = iterator.next();
+			if (cache.return_IPAddress() == senderIP) {
+				cache.setMACAddress(senderMAC);
+				cache.setStatus(true);
+				return;
+			}
+		}
+	}
+
 	public byte[] swap(byte[] input, byte[] srcmac, byte[] srcip, byte[] tarmac, byte[] tarip) {
 		input[7] = 0x02; //opcode 수정 (opcode reply로 설정)
 		System.arraycopy(srcmac, 0, input, 18, 6);

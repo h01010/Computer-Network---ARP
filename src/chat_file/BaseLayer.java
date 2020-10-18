@@ -38,5 +38,10 @@ interface BaseLayer {
 	public default boolean Receive() {
 		return false;
 	}
+	
+	//이성복 추가
+	public default void SetEnetDstAddress(byte[] dstMac) {
+		
+	}
 
 }
