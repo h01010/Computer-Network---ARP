@@ -91,7 +91,7 @@ public class IPLayer implements BaseLayer {
     public byte[] ObjectToByte(byte[] input, int length){
         byte[] buffer = new byte[length + HeaderSize];
         int beforeHeaderSize = 0;
-
+        
         update_ip_total_len(length + HeaderSize);
         
         /* copy header */
@@ -216,5 +216,12 @@ public class IPLayer implements BaseLayer {
 		this.SetUpperLayer(pUULayer);
 		pUULayer.SetUnderLayer(this);
 	}
-    
+	
+	public boolean Send(byte[] input, int length) {
+		return false;
+	}
+	
+	public synchronized boolean Receive(byte[] input) {
+		return false;
+	}
 }
