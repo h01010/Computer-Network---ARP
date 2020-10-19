@@ -234,6 +234,12 @@ public class IPLayer implements BaseLayer {
 	 * This method will send packet to under layer
 	 */
 	public synchronized boolean Receive(byte[] input) {
+		int startOfDestIp = 16;
+		byte[] targetIp = new byte[]{
+			input[startOfDestIp], input[startOfDestIp+ 1], input[startOfDestIp + 2], input[startOfDestIp + 3]};
+		if(Arrays.equals(targetIp, this.m_iHeader.srcIP)){
+		    return this.GetUpperLayer(0).Receive(removeHeader(input));
+		}
 		return false;
 	}
 }
