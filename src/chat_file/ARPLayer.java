@@ -122,16 +122,16 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	
-//	public class _ARP_TABLE {
-//		ArrayList<_ARP_CACHE> ARPTable;
-//		int numberOfCache;
-//		public _ARP_TABLE() {
-//			ARPTable = new ArrayList<_ARP_CACHE>();
-//			numberOfCache = 0;
-//		}
-//	}
+	public class _ARP_TABLE {
+		ArrayList<_ARP_CACHE> ARPTable;
+		int numberOfCache;
+		public _ARP_TABLE() {
+			ARPTable = new ArrayList<_ARP_CACHE>();
+			numberOfCache = 0;
+		}
+	}
 	
-	ArrayList<_ARP_CACHE> arpTable = new ArrayList<_ARP_CACHE>();
+	_ARP_TABLE arpTable = new _ARP_TABLE();
 	
 	public byte[] ObjToByte(_ARP_HEADER Header, byte[] input, int length) {
 		byte[] buf = new byte[length + 28];	//2, 2, 1, 1, 2, 6, 4, 6, 4 => 28
@@ -158,7 +158,7 @@ public class ARPLayer implements BaseLayer{
 			arpheader.setOpcode(new byte[] {0x00, 0x01});
 			
 			_ARP_CACHE cache = new _ARP_CACHE(arpheader.DstIP, arpheader.DstMac, false);
-			arpTable.add(cache);
+			arpTable.ARPTable.add(cache);
 		}
 		
 		//ARP CACHE 활용 부분
@@ -169,7 +169,7 @@ public class ARPLayer implements BaseLayer{
 	}
 
 	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC 주소를 알고있는지 물어보는 함수
-		Iterator<_ARP_CACHE> iterator = arpTable.iterator();
+		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
 			if (cache.return_IPAddress() == dstIP) {
@@ -199,7 +199,7 @@ public class ARPLayer implements BaseLayer{
 			
 			
 			_ARP_CACHE cache = new _ARP_CACHE(senderIP, senderMAC, true);
-			arpTable.add(cache);
+			arpTable.ARPTable.add(cache);
 			
 			
 			if(targetIP == arpheader.SrcIP) {	//request 메세지를 받았을 때 나에게 온 메세지이면 요청한 호스트에서 나의 mac 주소를 알려주어야함
@@ -223,7 +223,7 @@ public class ARPLayer implements BaseLayer{
 	}
 	
 	private void SetDstTrue(byte[] senderIP, byte[] senderMAC) {
-		Iterator<_ARP_CACHE> iterator = arpTable.iterator();
+		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
 			if (cache.return_IPAddress() == senderIP) {
