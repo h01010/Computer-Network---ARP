@@ -34,10 +34,12 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	Container contentPane;
 
 	JTextArea ChattingArea;
-	JTextArea srcMacAddress;
-	JTextArea dstMacAddress;
+	JTextArea srcMacAddress;	//modify
+	JTextArea srcIpAddress;
+	JTextArea dstIpAddress;
 
 	JLabel lblSelectNic;
+	JLabel macsrc;		//modify
 	JLabel lblsrc;
 	JLabel lbldst;
 
@@ -46,6 +48,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	JButton Chat_send_Button;
 	JButton NIC_select_Button;
 	JButton File_send_Button;
+	JButton Table_Button;
 
 	JComboBox comboBox;
 
@@ -76,7 +79,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		pLayerName = pName;
 		setTitle("Chatting & File Transfer");
 
-		setBounds(250, 250, 580, 400);
+		setBounds(250, 250, 580, 520);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		contentPane = this.getContentPane();
@@ -87,39 +90,48 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 
 		ChattingArea = new JTextArea();
 		ChattingArea.setEditable(false);
-		ChattingArea.setBounds(12, 13, 359, 226);
+		ChattingArea.setBounds(12, 13, 359, 326);
 		pane.add(ChattingArea);// 채팅
 
 		srcMacAddress = new JTextArea();
 		srcMacAddress.setEditable(false);
 		srcMacAddress.setBounds(383, 123, 170, 24);
-		pane.add(srcMacAddress);// 보내는 주소
+		pane.add(srcMacAddress);// 보내는 주소(mac)
+		
+		srcIpAddress = new JTextArea();
+		srcIpAddress.setEditable(false);
+		srcIpAddress.setBounds(383, 195, 170, 24);
+		pane.add(srcIpAddress);// 보내는 주소
 
-		dstMacAddress = new JTextArea();
-		dstMacAddress.setBounds(383, 182, 170, 24);
-		pane.add(dstMacAddress);// 받는 사람 주소
+		dstIpAddress = new JTextArea();
+		dstIpAddress.setBounds(383, 254, 170, 24);
+		pane.add(dstIpAddress);// 받는 사람 주소
 
 		ChattingWrite = new JTextField();
-		ChattingWrite.setBounds(12, 249, 359, 20);// 249
+		ChattingWrite.setBounds(12, 349, 359, 20);// 249
 		pane.add(ChattingWrite);
 		ChattingWrite.setColumns(10);// 채팅 쓰는 곳
 
 		FileDir_path = new JTextField();
 		FileDir_path.setEditable(false);
-		FileDir_path.setBounds(12, 280, 532, 20); // 280
+		FileDir_path.setBounds(12, 380, 532, 20); // 280
 		pane.add(FileDir_path);
 		FileDir_path.setColumns(10);// file 경로
 
 		lblSelectNic = new JLabel("NIC List");
 		lblSelectNic.setBounds(383, 13, 170, 20);
 		pane.add(lblSelectNic);// 글자
+		
+		macsrc = new JLabel("Your MAC Address");			//추가 : 목적지 Mac		
+		macsrc.setBounds(383, 98, 170, 20);						
+		pane.add(macsrc);										
 
-		lblsrc = new JLabel("Source Mac Address");
-		lblsrc.setBounds(383, 98, 170, 20);
+		lblsrc = new JLabel("Source IP Address");			//Mac->Ip
+		lblsrc.setBounds(383, 170, 170, 20);
 		pane.add(lblsrc);
 
-		lbldst = new JLabel("Destination Mac Address");
-		lbldst.setBounds(383, 157, 170, 20);
+		lbldst = new JLabel("Destination IP Address");		//Mac->Ip
+		lbldst.setBounds(383, 229, 170, 20);	
 		pane.add(lbldst);
 
 		Setting_Button = new JButton("Setting");// setting
@@ -159,8 +171,17 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 
 			}
 		});
-		Setting_Button.setBounds(418, 218, 87, 20);
+		Setting_Button.setBounds(418, 288, 87, 20);
 		pane.add(Setting_Button);// setting
+
+		Table_Button = new JButton("ARP Table");// ARP table
+		Table_Button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+			}
+		});
+		Table_Button.setBounds(408, 318, 107, 20);
+		pane.add(Table_Button);// ARP table
 
 		File_select_Button = new JButton("File select");// 파일 선택
 		File_select_Button.addActionListener(new ActionListener() {
@@ -180,7 +201,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 				}
 			}
 		});
-		File_select_Button.setBounds(75, 311, 161, 21);// 파일 선택위치 280
+		File_select_Button.setBounds(75, 411, 161, 21);// 파일 선택위치 280
 		pane.add(File_select_Button);
 
 		Chat_send_Button = new JButton("Send");
@@ -204,7 +225,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 				}
 			}
 		});
-		Chat_send_Button.setBounds(383, 249, 161, 21);
+		Chat_send_Button.setBounds(383, 349, 161, 21);
 		pane.add(Chat_send_Button);
 
 		NIC_select_Button = new JButton("Select");
@@ -253,7 +274,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 				}
 			}
 		});
-		File_send_Button.setBounds(322, 311, 161, 23);
+		File_send_Button.setBounds(322, 411, 161, 23);
 		pane.add(File_send_Button);
 
 		comboBox = new JComboBox();
