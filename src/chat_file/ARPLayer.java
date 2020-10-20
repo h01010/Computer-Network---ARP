@@ -122,7 +122,7 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	
-	public class _ARP_TABLE {
+	public static class _ARP_TABLE {
 		ArrayList<_ARP_CACHE> ARPTable;
 		int numberOfCache;
 		public _ARP_TABLE() {
@@ -131,7 +131,59 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	
+	public class _PROXYARP_CACHE {
+		byte[] IPAddress = new byte[4];
+		byte[] MACAddress = new byte[6];
+		
+		public _PROXYARP_CACHE(byte[] ipaddr, byte[] macaddr) {
+			this.setIPAddress(ipaddr);
+			this.setMACAddress(macaddr);
+		}
+		
+		public _PROXYARP_CACHE setIPAddress(byte[] ipaddr) {
+			this.IPAddress = ipaddr;
+			return this;
+		}
+		
+		public _PROXYARP_CACHE setMACAddress(byte[] macaddr) {
+			this.MACAddress = macaddr;
+			return this;
+		}
+		
+		//비교를 하기 위해 값을 리턴해주는 함수들
+		public byte[] return_IPAddress() {
+			return this.IPAddress;
+		}
+		
+		public byte[] return_MACAddress() {
+			return this.MACAddress;
+		}
+		
+	}
+	
+	public static class _PROXYARP_TABLE {
+		ArrayList<_PROXYARP_CACHE> PROXYARPTable;
+		int numberOfCache;
+		
+		public _PROXYARP_TABLE() {
+			PROXYARPTable = new ArrayList<_PROXYARP_CACHE>();
+			numberOfCache = 0;
+		}
+		
+		public _PROXYARP_CACHE getProxy(byte[] ip) {
+			Iterator<_PROXYARP_CACHE> iterator = PROXYARPTable.iterator();
+			while(iterator.hasNext()) {
+				_PROXYARP_CACHE cache = iterator.next();
+				if(cache.return_IPAddress() == ip) {
+					return cache;
+				}
+			}
+			return null;
+		}
+	}
+	
 	_ARP_TABLE arpTable = new _ARP_TABLE();
+	_PROXYARP_TABLE proxyarpTable = new _PROXYARP_TABLE();
 	
 	public byte[] ObjToByte(_ARP_HEADER Header, byte[] input, int length) {
 		byte[] buf = new byte[length + 28];	//2, 2, 1, 1, 2, 6, 4, 6, 4 => 28
@@ -150,21 +202,25 @@ public class ARPLayer implements BaseLayer{
 	
 	public boolean Send(byte[] input, int length) {
 		byte[] dstAddress = KnowDstMac(arpheader.DstIP);
+		byte[] dstAddressInProxyTable = KnowDstMacProxy(arpheader.SrcIP);
+		
 		if (dstAddress != null) {
 			this.GetUnderLayer().SetEnetDstAddress(dstAddress);	//Ethernet Layer SetEnetDstAddress Method
 			arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2를 쓰지 않기 위함
 			arpheader.setDstMac(dstAddress);
+		} else if (dstAddressInProxyTable != null) {
+			arpheader.setOpcode(new byte[] {0x00, 0x05});
+			arpheader.setDstMac(dstAddressInProxyTable);
 		} else {
 			arpheader.setOpcode(new byte[] {0x00, 0x01});
 			
 			_ARP_CACHE cache = new _ARP_CACHE(arpheader.DstIP, arpheader.DstMac, false);
 			arpTable.ARPTable.add(cache);
 		}
-		
-		//ARP CACHE 활용 부분
-		
+	
 		byte[] buf = ObjToByte(arpheader, input, length);
 		this.GetUnderLayer().Send(buf, buf.length);
+		
 		return true;
 	}
 
@@ -179,6 +235,18 @@ public class ARPLayer implements BaseLayer{
 				}
 				return null;
 			}
+		}
+		return null;
+	}
+	
+	private byte[] KnowDstMacProxy(byte[] dstIP) {									//DstMAC 주소를 알고있는지 물어보는 함수
+		Iterator<_PROXYARP_CACHE> iterator = proxyarpTable.PROXYARPTable.iterator();
+		while (iterator.hasNext()) {
+			_PROXYARP_CACHE cache = iterator.next();
+			if (cache.return_IPAddress() == dstIP) {
+					return cache.return_MACAddress();
+			}
+			return null;
 		}
 		return null;
 	}
@@ -206,6 +274,13 @@ public class ARPLayer implements BaseLayer{
 				byte[] swapData = swap(input, senderMAC, senderIP, arpheader.SrcMac, targetIP);
 				GetUnderLayer().Send(swapData, swapData.length);
 			}
+			
+			_PROXYARP_CACHE proxycache = proxyarpTable.getProxy(targetIP);
+			if (proxycache != null) {
+				byte[] swapData = swap(input, senderMAC, senderIP, proxycache.MACAddress, proxycache.IPAddress);
+				GetUnderLayer().Send(swapData, swapData.length);
+			}
+				
 		} else {	//opcode[0] == 0x02	reply
 			/* 응답하는 메세지를 받았으니까 현재 받은 호스트 입장에서는  Sender Mac, Sender IP를 궁금해 할 것 같다.
 			 * 왜냐? 그게 궁금해서 보낸거였으니까
