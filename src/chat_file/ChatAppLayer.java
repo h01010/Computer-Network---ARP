@@ -60,7 +60,7 @@ public class ChatAppLayer implements BaseLayer{
 	
     public boolean Send(byte[] input, int length) {
     	int[] dataLength;
-    	byte[] newData;
+    	byte[] newData = null;
         m_sHeader.capp_totlen = new byte[2];
         m_sHeader.capp_totlen[0] = (byte) length;
         m_sHeader.capp_totlen[1] = (byte) (length >> 8);
@@ -146,7 +146,6 @@ public class ChatAppLayer implements BaseLayer{
             }
             return false;
         }
-		return false;
 	}
 
 	@Override
