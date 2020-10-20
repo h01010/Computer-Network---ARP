@@ -94,10 +94,10 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		ChattingArea.setBounds(12, 13, 359, 326);
 		pane.add(ChattingArea);// 채팅
 
-		srcIpAddress = new JTextArea();
-		srcIpAddress.setEditable(false);
-		srcIpAddress.setBounds(383, 123, 170, 24);
-		pane.add(srcIpAddress);// 보내는 주소(mac)
+		srcMacAddress = new JTextArea();
+		srcMacAddress.setEditable(false);
+		srcMacAddress.setBounds(383, 123, 170, 24);
+		pane.add(srcMacAddress);// 보내는 주소(mac)
 		
 		srcIpAddress = new JTextArea();
 		srcIpAddress.setEditable(false);
@@ -234,16 +234,16 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = comboBox.getSelectedItem().toString();
 				selected_index = comboBox.getSelectedIndex();
-				srcIpAddress.setText("");
+				srcMacAddress.setText("");
 				try {
 					byte[] MacAddress = ((NILayer) m_LayerMgr.GetLayer("NI")).GetAdapterObject(selected_index)
 							.getHardwareAddress();
 					String hexNumber;
 					for (int i = 0; i < 6; i++) {
 						hexNumber = Integer.toHexString(0xff & MacAddress[i]);
-						srcIpAddress.append(hexNumber.toUpperCase());
+						srcMacAddress.append(hexNumber.toUpperCase());
 						if (i != 5)
-							srcIpAddress.append("-");
+							srcMacAddress.append("-");
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
