@@ -146,6 +146,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					Setting_Button.setText("Setting");
 					dstIpAddress.setEditable(true);
 				} else {
+					// 수정 필요 : 해당 부분 IP address에 대하여 작업을 하도록 수정해야함!
 					byte[] srcAddress = new byte[6];
 					byte[] dstAddress = new byte[6];
 
