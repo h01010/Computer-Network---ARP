@@ -2,6 +2,7 @@ package chat_file;
 
 import java.awt.Container;
 import java.awt.GridBagLayout;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -31,8 +32,8 @@ public class ARPTableDlg extends JFrame {
 	JTextField IpAddress;
 	JTextField MacAddress;
 
-	JTextArea arpTable;
-	JTextArea proxyTable;
+	List arpTable;
+	List proxyTable;
 
 	public ARPTableDlg() {
 		setTitle("ARP Table");
@@ -50,8 +51,7 @@ public class ARPTableDlg extends JFrame {
 		ARPCache.setBorder(BorderFactory.createTitledBorder("ARP Cache"));
 		ARPCache.setBounds(10, 10, 395, 400);
 
-		this.arpTable = new JTextArea();
-		this.arpTable.setEditable(false);
+		this.arpTable = new List();
 		this.arpTable.setBounds(10, 20, 375, 280);
 		ARPCache.add(this.arpTable);
 
@@ -102,8 +102,7 @@ public class ARPTableDlg extends JFrame {
 		ProxyARPEntry.setBorder(BorderFactory.createTitledBorder("Proxy ARP Entry"));
 		ProxyARPEntry.setBounds(410, 10, 395, 320);
 
-		this.proxyTable = new JTextArea();
-		this.proxyTable.setEditable(false);
+		this.proxyTable = new List();
 		this.proxyTable.setBounds(10, 20, 375, 250);
 		ProxyARPEntry.add(this.proxyTable);
 
