@@ -6,8 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.*;
+import chat_file.ARPLayer.*;
 
-public class ARPTable extends JFrame {
+public class ARPTableDlg extends JFrame {
 
 	Container contentPane;
 
@@ -33,7 +34,7 @@ public class ARPTable extends JFrame {
 	JTextArea arpTable;
 	JTextArea proxyTable;
 
-	public ARPTable() {
+	public ARPTableDlg() {
 		setTitle("ARP Table");
 		setBounds(850, 250, 830, 520);
 
@@ -43,7 +44,7 @@ public class ARPTable extends JFrame {
 		pane.setLayout(null);
 		contentPane.add(pane);
 
-		// ARP Cache Panel°ú Ä­¿¡ ÇØ´çÇÏ´Â ÄÄÆ÷³ÍÆ®
+		// ARP Cache Panelê³¼ ì¹¸ì— í•´ë‹¹í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
 		ARPCache = new JPanel();
 		ARPCache.setLayout(null);
 		ARPCache.setBorder(BorderFactory.createTitledBorder("ARP Cache"));
@@ -54,7 +55,7 @@ public class ARPTable extends JFrame {
 		this.arpTable.setBounds(10, 20, 375, 280);
 		ARPCache.add(this.arpTable);
 
-		this.lbIpAddress = new JLabel("IPÁÖ¼Ò");
+		this.lbIpAddress = new JLabel("IPì£¼ì†Œ");
 		this.lbIpAddress.setBounds(10, 360, 50, 30);
 		ARPCache.add(this.lbIpAddress);
 
@@ -62,29 +63,29 @@ public class ARPTable extends JFrame {
 		this.IpAddress.setBounds(60, 360, 230, 30);
 		ARPCache.add(this.IpAddress);
 
-		// ARP »èÁ¦ ¹öÆ°
+		// ARP ì‚­ì œ ë²„íŠ¼
 		this.ARPItemDelBtn = new JButton("Item Delete");
 		this.ARPItemDelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				
 			}
 		});
 		this.ARPItemDelBtn.setBounds(25, 310, 150, 30);
 		ARPCache.add(this.ARPItemDelBtn);
 
-		// ARP Table ÃÊ±âÈ­ ¹öÆ°
+		// ARP Table ì´ˆê¸°í™” ë²„íŠ¼
 		this.ARPAllDelBtn = new JButton("All Delete");
 		this.ARPAllDelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				
 			}
 		});
 		this.ARPAllDelBtn.setBounds(220, 310, 150, 30);
 		ARPCache.add(this.ARPAllDelBtn);
 
-		// ipÀü¼Û ¹öÆ°
+		// ipì „ì†¡ ë²„íŠ¼
 		this.ipSendBtn = new JButton("Send");
 		this.ipSendBtn.addActionListener(new ActionListener() {
 
@@ -95,7 +96,7 @@ public class ARPTable extends JFrame {
 		this.ipSendBtn.setBounds(295, 360, 90, 30);
 		ARPCache.add(this.ipSendBtn);
 
-		// Proxy ARP Entry Panel°ú Ä­¿¡ ÇØ´çÇÏ´Â ÄÄÆ÷³ÍÆ®
+		// Proxy ARP Entry Panelê³¼ ì¹¸ì— í•´ë‹¹í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
 		ProxyARPEntry = new JPanel();
 		ProxyARPEntry.setLayout(null);
 		ProxyARPEntry.setBorder(BorderFactory.createTitledBorder("Proxy ARP Entry"));
@@ -106,7 +107,7 @@ public class ARPTable extends JFrame {
 		this.proxyTable.setBounds(10, 20, 375, 250);
 		ProxyARPEntry.add(this.proxyTable);
 
-		// proxy arp Ãß°¡ ¹öÆ°
+		// proxy arp ì¶”ê°€ ë²„íŠ¼
 		this.proxyAddBtn = new JButton("Add");
 		this.proxyAddBtn.addActionListener(new ActionListener() {
 
@@ -117,7 +118,7 @@ public class ARPTable extends JFrame {
 		this.proxyAddBtn.setBounds(30, 280, 140, 30);
 		ProxyARPEntry.add(this.proxyAddBtn);
 
-		// proxy arp »èÁ¦ ¹öÆ°
+		// proxy arp ì‚­ì œ ë²„íŠ¼
 		this.proxyDelBtn = new JButton("Delete");
 		this.proxyDelBtn.addActionListener(new ActionListener() {
 
@@ -128,13 +129,13 @@ public class ARPTable extends JFrame {
 		this.proxyDelBtn.setBounds(225, 280, 140, 30);
 		ProxyARPEntry.add(this.proxyDelBtn);
 
-		// Gratuitous ARP Panel°ú Ä­¿¡ ÇØ´çÇÏ´Â ÄÄÆ÷³ÍÆ®
+		// Gratuitous ARP Panelê³¼ ì¹¸ì— í•´ë‹¹í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
 		GratuitousARP = new JPanel();
 		GratuitousARP.setLayout(null);
 		GratuitousARP.setBorder(BorderFactory.createTitledBorder("Gratuitous ARP"));
 		GratuitousARP.setBounds(410, 330, 395, 80);
 
-		this.lbMacAddress = new JLabel("H/W ÁÖ¼Ò");
+		this.lbMacAddress = new JLabel("H/W ì£¼ì†Œ");
 		this.lbMacAddress.setBounds(15, 30, 60, 30);
 		GratuitousARP.add(this.lbMacAddress);
 
@@ -142,7 +143,7 @@ public class ARPTable extends JFrame {
 		this.MacAddress.setBounds(75, 30, 225, 30);
 		GratuitousARP.add(this.MacAddress);
 
-		// mac Send ¹öÆ°
+		// mac Send ë²„íŠ¼
 		this.macSendBtn = new JButton("Send");
 		this.macSendBtn.addActionListener(new ActionListener() {
 
@@ -153,23 +154,23 @@ public class ARPTable extends JFrame {
 		this.macSendBtn.setBounds(305, 30, 80, 30);
 		GratuitousARP.add(this.macSendBtn);
 
-		// proxy arp Ãß°¡ ¹öÆ°
-		this.endBtn = new JButton("Á¾·á");
+		// proxy arp ì¶”ê°€ ë²„íŠ¼
+		this.endBtn = new JButton("ì¢…ë£Œ");
 		this.endBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				
 			}
 		});
 		this.endBtn.setBounds(260, 420, 140, 40);
 		pane.add(this.endBtn);
 		
-		// proxy arp Ãß°¡ ¹öÆ°
-		this.cancelBtn = new JButton("Ãë¼Ò");
+		// proxy arp ì¶”ê°€ ë²„íŠ¼
+		this.cancelBtn = new JButton("ì·¨ì†Œ");
 		this.cancelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				setVisible(false);
 			}
 		});
 		this.cancelBtn.setBounds(415, 420, 140, 40);
