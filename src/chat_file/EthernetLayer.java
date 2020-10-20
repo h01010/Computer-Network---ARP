@@ -1,3 +1,4 @@
+package chat_file;
 
 
 import java.util.ArrayList;
@@ -49,7 +50,7 @@ public class EthernetLayer implements BaseLayer {
 		}
 	}
 
-	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// data에 헤더 붙여주기
+	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// data�뿉 �뿤�뜑 遺숈뿬二쇨린
 		byte[] buf = new byte[length + 14];
 		for (int i = 0; i < 6; i++) {
 			buf[i] = Header.enet_dstaddr.addr[i];
@@ -63,7 +64,7 @@ public class EthernetLayer implements BaseLayer {
 		return buf;
 	}
 
-	// 브로드 캐스트일 경우, type이 0xff
+	// 釉뚮줈�뱶 罹먯뒪�듃�씪 寃쎌슦, type�씠 0xff
 	public boolean Send(byte[] input, int length) {
 		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
 			m_sHeader.enet_type = intToByte2(0x01ff);
