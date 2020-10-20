@@ -68,7 +68,11 @@ public class ARPTableDlg extends JFrame {
 		this.ARPItemDelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				
+				int temp = arpTable.getSelectedIndex();
+				if(temp>0) {
+					arpTable.remove(temp);
+					// ToDo : remove (test)th element in _ARP_TABLE
+				}	
 			}
 		});
 		this.ARPItemDelBtn.setBounds(25, 310, 150, 30);
@@ -79,7 +83,8 @@ public class ARPTableDlg extends JFrame {
 		this.ARPAllDelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				
+				arpTable.removeAll();
+				// ToDo : reset _ARP_TABLE
 			}
 		});
 		this.ARPAllDelBtn.setBounds(220, 310, 150, 30);
