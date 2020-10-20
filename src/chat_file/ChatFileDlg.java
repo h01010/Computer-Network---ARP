@@ -18,6 +18,8 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 
+import test5.ARPTable;
+
 public class ChatFileDlg extends JFrame implements BaseLayer {
 	public int nUpperLayerCount = 0;
 	public String pLayerName = null;
@@ -177,7 +179,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		Table_Button = new JButton("ARP Table");// ARP table
 		Table_Button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-
+				new ARPTable();
 			}
 		});
 		Table_Button.setBounds(408, 318, 107, 20);
