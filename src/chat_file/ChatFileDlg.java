@@ -218,7 +218,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					//((EthernetLayer) m_LayerMgr.GetLayer("Ethernet")).SetEnetType(type);
 
 					byte[] bytes = input.getBytes();
-					m_LayerMgr.GetLayer("Chat").Send(bytes, bytes.length);
+					m_LayerMgr.GetLayer("CHAT").Send(bytes, bytes.length);
 					// p_UnderLayer.Send(bytes, bytes.length);
 				} else {
 					JOptionPane.showMessageDialog(null, "주소 설정 오류");
