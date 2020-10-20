@@ -58,8 +58,8 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 
 	public static void main(String[] args) {
 		/*
-		 * Layer ¿¬°á ¼ø¼­ Àý´ë ¹Ù²ÙÁö ¸» °Í!!!
-		 * ¸¸ÀÏ ¾î¶°ÇÑ ÀÌÀ¯·Î ¹Ù²ã¾ß ÇÑ´Ù¸é ¹Ù²Ù°í ²À ¸»ÇÒ°Í!!!
+		 * Layer ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½!!!
+		 * ï¿½ï¿½ï¿½ï¿½ ï¿½î¶°ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ù²ï¿½ï¿½ ï¿½Ñ´Ù¸ï¿½ ï¿½Ù²Ù°ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ò°ï¿½!!!
 		 */
 		m_LayerMgr.AddLayer(new ChatFileDlg("GUI"));
 		m_LayerMgr.AddLayer(new ChatAppLayer("CHAT"));
@@ -93,38 +93,38 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		ChattingArea = new JTextArea();
 		ChattingArea.setEditable(false);
 		ChattingArea.setBounds(12, 13, 359, 326);
-		pane.add(ChattingArea);// Ã¤ÆÃ
+		pane.add(ChattingArea);// Ã¤ï¿½ï¿½
 
 		srcMacAddress = new JTextArea();
 		srcMacAddress.setEditable(false);
 		srcMacAddress.setBounds(383, 123, 170, 24);
-		pane.add(srcMacAddress);// º¸³»´Â ÁÖ¼Ò(mac)
+		pane.add(srcMacAddress);// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½(mac)
 		
 		srcIpAddress = new JTextArea();
 		srcIpAddress.setEditable(false);
 		srcIpAddress.setBounds(383, 195, 170, 24);
-		pane.add(srcIpAddress);// º¸³»´Â ÁÖ¼Ò
+		pane.add(srcIpAddress);// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½
 
 		dstIpAddress = new JTextArea();
 		dstIpAddress.setBounds(383, 254, 170, 24);
-		pane.add(dstIpAddress);// ¹Þ´Â »ç¶÷ ÁÖ¼Ò
+		pane.add(dstIpAddress);// ï¿½Þ´ï¿½ ï¿½ï¿½ï¿½ ï¿½Ö¼ï¿½
 
 		ChattingWrite = new JTextField();
 		ChattingWrite.setBounds(12, 349, 359, 20);// 249
 		pane.add(ChattingWrite);
-		ChattingWrite.setColumns(10);// Ã¤ÆÃ ¾²´Â °÷
+		ChattingWrite.setColumns(10);// Ã¤ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½
 
 		FileDir_path = new JTextField();
 		FileDir_path.setEditable(false);
 		FileDir_path.setBounds(12, 380, 532, 20); // 280
 		pane.add(FileDir_path);
-		FileDir_path.setColumns(10);// file °æ·Î
+		FileDir_path.setColumns(10);// file ï¿½ï¿½ï¿½
 
 		lblSelectNic = new JLabel("NIC List");
 		lblSelectNic.setBounds(383, 13, 170, 20);
-		pane.add(lblSelectNic);// ±ÛÀÚ
+		pane.add(lblSelectNic);// ï¿½ï¿½ï¿½ï¿½
 		
-		macsrc = new JLabel("Your MAC Address");			//Ãß°¡ : ¸ñÀûÁö Mac		
+		macsrc = new JLabel("Your MAC Address");			//ï¿½ß°ï¿½ : ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Mac		
 		macsrc.setBounds(383, 98, 170, 20);						
 		pane.add(macsrc);										
 
@@ -146,7 +146,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					Setting_Button.setText("Setting");
 					dstIpAddress.setEditable(true);
 				} else {
-					// ¼öÁ¤ ÇÊ¿ä : ÇØ´ç ºÎºÐ IP address¿¡ ´ëÇÏ¿© ÀÛ¾÷À» ÇÏµµ·Ï ¼öÁ¤ÇØ¾ßÇÔ!
+					// ï¿½ï¿½ï¿½ï¿½ ï¿½Ê¿ï¿½ : ï¿½Ø´ï¿½ ï¿½Îºï¿½ IP addressï¿½ï¿½ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Û¾ï¿½ï¿½ï¿½ ï¿½Ïµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ø¾ï¿½ï¿½ï¿½!
 					byte[] srcAddress = new byte[6];
 					byte[] dstAddress = new byte[6];
 
@@ -180,19 +180,19 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		Table_Button = new JButton("ARP Table");// ARP table
 		Table_Button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				new ARPTable();
+				new ARPTableDlg();
 			}
 		});
 		Table_Button.setBounds(408, 318, 107, 20);
 		pane.add(Table_Button);// ARP table
 
-		File_select_Button = new JButton("File select");// ÆÄÀÏ ¼±ÅÃ
+		File_select_Button = new JButton("File select");// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		File_select_Button.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
 				if (Setting_Button.getText() == "Reset") {
 
-					fd = new FileDialog(ChatFileDlg.this, "ÆÄÀÏ¼±ÅÃ", FileDialog.LOAD);
+					fd = new FileDialog(ChatFileDlg.this, "ï¿½ï¿½ï¿½Ï¼ï¿½ï¿½ï¿½", FileDialog.LOAD);
 					fd.setVisible(true);
 
 					if (fd.getFile() != null) {
@@ -200,11 +200,11 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 						FileDir_path.setText("" + path);
 					}
 				} else {
-					JOptionPane.showMessageDialog(null, "ÁÖ¼Ò ¼³Á¤ ¿À·ù", "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
+					JOptionPane.showMessageDialog(null, "ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½", "WARNING_MESSAGE", JOptionPane.WARNING_MESSAGE);
 				}
 			}
 		});
-		File_select_Button.setBounds(75, 411, 161, 21);// ÆÄÀÏ ¼±ÅÃÀ§Ä¡ 280
+		File_select_Button.setBounds(75, 411, 161, 21);// ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¡ 280
 		pane.add(File_select_Button);
 
 		Chat_send_Button = new JButton("Send");
@@ -224,7 +224,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					m_LayerMgr.GetLayer("CHAT").Send(bytes, bytes.length);
 					// p_UnderLayer.Send(bytes, bytes.length);
 				} else {
-					JOptionPane.showMessageDialog(null, "ÁÖ¼Ò ¼³Á¤ ¿À·ù");
+					JOptionPane.showMessageDialog(null, "ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
 				}
 			}
 		});
@@ -274,7 +274,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 				}
 
 				else {
-					JOptionPane.showMessageDialog(null, "ÁÖ¼Ò ¼³Á¤ ¿À·ù");
+					JOptionPane.showMessageDialog(null, "ï¿½Ö¼ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½");
 				}
 			}
 		});
