@@ -93,10 +93,10 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 		ChattingArea.setBounds(12, 13, 359, 326);
 		pane.add(ChattingArea);// 채팅
 
-		srcMacAddress = new JTextArea();
-		srcMacAddress.setEditable(false);
-		srcMacAddress.setBounds(383, 123, 170, 24);
-		pane.add(srcMacAddress);// 보내는 주소(mac)
+		srcIpAddress = new JTextArea();
+		srcIpAddress.setEditable(false);
+		srcIpAddress.setBounds(383, 123, 170, 24);
+		pane.add(srcIpAddress);// 보내는 주소(mac)
 		
 		srcIpAddress = new JTextArea();
 		srcIpAddress.setEditable(false);
@@ -139,16 +139,16 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent arg0) {
 
 				if (Setting_Button.getText() == "Reset") {
-					srcMacAddress.setText("");
-					dstMacAddress.setText("");
+					srcIpAddress.setText("");
+					dstIpAddress.setText("");
 					Setting_Button.setText("Setting");
-					dstMacAddress.setEditable(true);
+					dstIpAddress.setEditable(true);
 				} else {
 					byte[] srcAddress = new byte[6];
 					byte[] dstAddress = new byte[6];
 
-					String src = srcMacAddress.getText();
-					String dst = dstMacAddress.getText();
+					String src = srcIpAddress.getText();
+					String dst = dstIpAddress.getText();
 
 					String[] byte_src = src.split("-");
 					for (int i = 0; i < 6; i++) {
@@ -166,7 +166,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(selected_index);
 
 					Setting_Button.setText("Reset");
-					dstMacAddress.setEditable(false);
+					dstIpAddress.setEditable(false);
 				}
 
 			}
@@ -233,16 +233,16 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 			public void actionPerformed(ActionEvent arg0) {
 				String selected = comboBox.getSelectedItem().toString();
 				selected_index = comboBox.getSelectedIndex();
-				srcMacAddress.setText("");
+				srcIpAddress.setText("");
 				try {
 					byte[] MacAddress = ((NILayer) m_LayerMgr.GetLayer("NI")).GetAdapterObject(selected_index)
 							.getHardwareAddress();
 					String hexNumber;
 					for (int i = 0; i < 6; i++) {
 						hexNumber = Integer.toHexString(0xff & MacAddress[i]);
-						srcMacAddress.append(hexNumber.toUpperCase());
+						srcIpAddress.append(hexNumber.toUpperCase());
 						if (i != 5)
-							srcMacAddress.append("-");
+							srcIpAddress.append("-");
 					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
