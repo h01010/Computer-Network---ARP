@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -245,6 +246,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 						if (i != 5)
 							srcMacAddress.append("-");
 					}
+					srcIpAddress.append(InetAddress.getLocalHost().getHostAddress());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
