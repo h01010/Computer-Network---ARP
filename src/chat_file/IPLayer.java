@@ -156,11 +156,11 @@ public class IPLayer implements BaseLayer {
 	 */
 	@Override
 	public BaseLayer GetUnderLayer() {
-		boolean isUnderLayerExist = (this.mp_UnderLayer != null); // cond about under layer exsitence
-		if(isUnderLayerExist) { // if under layer founded
-			return this.mp_UnderLayer; // return under layer(just 1 level)
+		// boolean isUnderLayerExist = (this.mp_UnderLayer != null); // cond about under layer exsitence
+		if(mp_UnderLayer == null) { // if under layer founded
+			return null;
 		} else {
-			return null; // if not founded -> then, return null object
+			return mp_UnderLayer; // return under layer(just 1 level)
 		}
 	}
 
