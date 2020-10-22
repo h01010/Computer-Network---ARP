@@ -23,7 +23,7 @@ public class ARPTableDlg extends JFrame {
 	JButton proxyAddBtn;
 	JButton proxyDelBtn;
 	JButton macSendBtn;
-	JButton cancelBtn;
+	JButton refleshBtn;
 	JButton endBtn;
 
 	JLabel lbIpAddress;
@@ -158,7 +158,7 @@ public class ARPTableDlg extends JFrame {
 		this.macSendBtn.setBounds(305, 30, 80, 30);
 		GratuitousARP.add(this.macSendBtn);
 
-		// proxy arp 추가 버튼
+		// 종료 버튼
 		this.endBtn = new JButton("종료");
 		this.endBtn.addActionListener(new ActionListener() {
 
@@ -169,16 +169,16 @@ public class ARPTableDlg extends JFrame {
 		this.endBtn.setBounds(260, 420, 140, 40);
 		pane.add(this.endBtn);
 		
-		// proxy arp 추가 버튼
-		this.cancelBtn = new JButton("취소");
-		this.cancelBtn.addActionListener(new ActionListener() {
+		// 새로고침 버튼
+		this.refleshBtn = new JButton("새로고침");
+		this.refleshBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
 				setVisible(false);
 			}
 		});
-		this.cancelBtn.setBounds(415, 420, 140, 40);
-		pane.add(this.cancelBtn);
+		this.refleshBtn.setBounds(415, 420, 140, 40);
+		pane.add(this.refleshBtn);
 
 		pane.add(ARPCache);
 		pane.add(ProxyARPEntry);
