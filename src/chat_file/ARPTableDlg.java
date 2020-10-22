@@ -150,9 +150,29 @@ public class ARPTableDlg extends JFrame {
 		// mac Send 버튼
 		this.macSendBtn = new JButton("Send");
 		this.macSendBtn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {/*       //예상 GARP SEND 코드
+				byte[] mac = MACStringToByte(MacAddress.getText());
+				arpLayer.setSrcMac(mac);
+				ethernetLayer.setSrcAddr(mac);
+				
+				Send send = new Send();
+				send.run();
+				
+			}
 
-			public void actionPerformed(ActionEvent arg0) {
-
+			private byte[] MACStringToByte(String Mac) {
+				byte[] result = new byte[6];
+				StringTokenizer tokens = new StringTokenizer(Mac, "-");
+				for(int i = 0; tokens.hasMoreElements(); i++) {
+					String temp = tokens.nextToken();
+					try {
+						result[i] = Byte.parseByte(temp, 16);
+					} catch(NumberFormatException e) {
+						int error = (Integer.parseInt(temp, 16)) - 256;
+						result[i] = (byte) (error);
+					}
+				}
+				return result;*/
 			}
 		});
 		this.macSendBtn.setBounds(305, 30, 80, 30);

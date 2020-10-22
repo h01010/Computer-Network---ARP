@@ -269,6 +269,10 @@ public class ARPLayer implements BaseLayer{
 			_ARP_CACHE cache = new _ARP_CACHE(senderIP, senderMAC, true);
 			arpTable.ARPTable.add(cache);
 			
+			if(senderIP.equals(targetIP)) {		//GARP는 보낸 IP와 받는 IP가 같으므로, if문으로 GARP인지 구분하고, drop한다.
+				SetDstTrue(senderIP, senderMAC);
+				return true;
+			}
 			
 			if(targetIP == arpheader.SrcIP) {	//request 메세지를 받았을 때 나에게 온 메세지이면 요청한 호스트에서 나의 mac 주소를 알려주어야함
 				byte[] swapData = swap(input, senderMAC, senderIP, arpheader.SrcMac, targetIP);
