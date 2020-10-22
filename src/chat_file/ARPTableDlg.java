@@ -35,6 +35,81 @@ public class ARPTableDlg extends JFrame {
 	List arpTable;
 	List proxyTable;
 
+	private class ProxyPopup extends JFrame {
+		Container contentPane;
+
+		JButton okBtn;
+		JButton cancelBtn;
+
+		JLabel lbDevice;
+		JLabel lbIpAddress;
+		JLabel lbMacAddress;
+
+		JTextField ipAddress;
+		JTextField macAddress;
+		JTextField device;
+
+		public ProxyPopup() {
+			setTitle("Proxy ARP Entry 추가");
+			setBounds(680, 300, 350, 220);
+
+			contentPane = this.getContentPane();
+			JPanel pane = new JPanel();
+
+			pane.setLayout(null);
+			contentPane.add(pane);
+
+			this.lbDevice = new JLabel("Device");
+			this.lbDevice.setBounds(20, 20, 100, 20);
+			pane.add(this.lbDevice);
+
+			this.device = new JTextField();
+			this.device.setBounds(130, 20, 180, 20);
+			pane.add(this.device);
+
+			this.lbIpAddress = new JLabel("IP Address");
+			this.lbIpAddress.setBounds(20, 50, 100, 20);
+			pane.add(this.lbIpAddress);
+
+			this.ipAddress = new JTextField();
+			this.ipAddress.setBounds(130, 50, 180, 20);
+			pane.add(this.ipAddress);
+
+			this.lbMacAddress = new JLabel("Mac Address");
+			this.lbMacAddress.setBounds(20, 80, 100, 20);
+			pane.add(this.lbMacAddress);
+
+			this.macAddress = new JTextField();
+			this.macAddress.setBounds(130, 80, 180, 20);
+			pane.add(this.macAddress);
+
+			this.okBtn = new JButton("Ok");
+			this.okBtn.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+					addProxy(device.getText(), ipAddress.getText(), macAddress.getText());
+					readProxy();
+					dispose();
+				}
+			});
+
+			this.okBtn.setBounds(50, 120, 100, 30);
+			pane.add(okBtn);
+
+			this.cancelBtn = new JButton("Cancel");
+			this.cancelBtn.setBounds(160, 120, 100, 30);
+			this.cancelBtn.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent arg0) {
+					dispose();
+				}
+			});
+			pane.add(cancelBtn);
+
+			setVisible(true);
+		}
+	}
+
 	public ARPTableDlg() {
 		setTitle("ARP Table");
 		setBounds(850, 250, 830, 520);
@@ -69,10 +144,12 @@ public class ARPTableDlg extends JFrame {
 
 			public void actionPerformed(ActionEvent arg0) {
 				int temp = arpTable.getSelectedIndex();
-				if(temp>0) {
-					arpTable.remove(temp);
-					// ToDo : remove (test)th element in _ARP_TABLE
-				}	
+				if (temp >= 0) {
+					boolean result = deleteARP(temp);
+					if(result) {
+						arpTable.remove(temp);
+						}
+				}
 			}
 		});
 		this.ARPItemDelBtn.setBounds(25, 310, 150, 30);
@@ -83,8 +160,10 @@ public class ARPTableDlg extends JFrame {
 		this.ARPAllDelBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				arpTable.removeAll();
-				// ToDo : reset _ARP_TABLE
+				boolean result = deleteAllARP();
+				if(result) {
+					arpTable.removeAll();
+					}
 			}
 		});
 		this.ARPAllDelBtn.setBounds(220, 310, 150, 30);
@@ -95,7 +174,10 @@ public class ARPTableDlg extends JFrame {
 		this.ipSendBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				boolean result = sendIpARP(IpAddress.getText());
+				if(result) {
+					IpAddress.setText("");
+				}
 			}
 		});
 		this.ipSendBtn.setBounds(295, 360, 90, 30);
@@ -116,7 +198,7 @@ public class ARPTableDlg extends JFrame {
 		this.proxyAddBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-
+				new ProxyPopup();
 			}
 		});
 		this.proxyAddBtn.setBounds(30, 280, 140, 30);
@@ -125,9 +207,14 @@ public class ARPTableDlg extends JFrame {
 		// proxy arp 삭제 버튼
 		this.proxyDelBtn = new JButton("Delete");
 		this.proxyDelBtn.addActionListener(new ActionListener() {
-
 			public void actionPerformed(ActionEvent arg0) {
-
+				int temp = proxyTable.getSelectedIndex();
+				if(temp>=0) {
+					boolean result = deleteProxy(temp);
+					if(result) {
+						proxyTable.remove(temp);
+					}
+				}
 			}
 		});
 		this.proxyDelBtn.setBounds(225, 280, 140, 30);
@@ -150,29 +237,9 @@ public class ARPTableDlg extends JFrame {
 		// mac Send 버튼
 		this.macSendBtn = new JButton("Send");
 		this.macSendBtn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {/*       //예상 GARP SEND 코드
-				byte[] mac = MACStringToByte(MacAddress.getText());
-				arpLayer.setSrcMac(mac);
-				ethernetLayer.setSrcAddr(mac);
-				
-				Send send = new Send();
-				send.run();
-				
-			}
-
-			private byte[] MACStringToByte(String Mac) {
-				byte[] result = new byte[6];
-				StringTokenizer tokens = new StringTokenizer(Mac, "-");
-				for(int i = 0; tokens.hasMoreElements(); i++) {
-					String temp = tokens.nextToken();
-					try {
-						result[i] = Byte.parseByte(temp, 16);
-					} catch(NumberFormatException e) {
-						int error = (Integer.parseInt(temp, 16)) - 256;
-						result[i] = (byte) (error);
-					}
-				}
-				return result;*/
+			public void actionPerformed(ActionEvent arg0) {
+				sendMacGARP(MacAddress.getText());
+				MacAddress.setText("");
 			}
 		});
 		this.macSendBtn.setBounds(305, 30, 80, 30);
@@ -183,18 +250,21 @@ public class ARPTableDlg extends JFrame {
 		this.endBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				
+				dispose();
 			}
 		});
 		this.endBtn.setBounds(260, 420, 140, 40);
 		pane.add(this.endBtn);
-		
+
 		// 새로고침 버튼
 		this.refleshBtn = new JButton("새로고침");
 		this.refleshBtn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				setVisible(false);
+				proxyTable.removeAll();
+				arpTable.removeAll();
+				readARP();
+				readProxy();
 			}
 		});
 		this.refleshBtn.setBounds(415, 420, 140, 40);
@@ -207,4 +277,59 @@ public class ARPTableDlg extends JFrame {
 		// setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 	}
+
+	
+	// ARP Table 관련 함수
+	public boolean readARP() {			// ARP Table 읽어오기
+		//읽어온 데이터는  this.arpTable.add()를 통해 하나씩 삽입해주세요!
+		return false;
+	}
+	
+	public boolean deleteARP(int index) { // ARP Table에서 index에 해당하는 원소 하나 삭제
+		return false;
+	}
+
+	public boolean deleteAllARP() { // ARP Table 초기화
+		return false;
+	}
+	public boolean sendIpARP(String ipAddress) {	//Ip Address 전송
+		return false;
+	}
+
+	
+	// ProxyARP Table 관련 함수
+	public boolean readProxy() {			//Proxy Table 읽어오기
+		//읽어온 데이터는 this.proxyTable.add()를 통해 하나씩 삽입해주세요!
+		return false;
+	}
+	
+	public boolean addProxy(String device, String iPAddress, String macAddress) { // Proxy ARP Table 내 새 원소 추가
+		return false;
+	}
+
+	public boolean deleteProxy(int index) { // Proxy ARP Table 내 index 원소 삭제
+		return false;
+	}
+
+	
+	// GARP Table 관련 함수
+	public boolean sendMacGARP(String macAddress) {
+		/*
+		 * //예상 GARP SEND 코드 byte[] mac = MACStringToByte(MacAddress.getText());
+		 * arpLayer.setSrcMac(mac); ethernetLayer.setSrcAddr(mac);
+		 * 
+		 * Send send = new Send(); send.run();
+		 * 
+		 * }
+		 * 
+		 * private byte[] MACStringToByte(String Mac) { byte[] result = new byte[6];
+		 * StringTokenizer tokens = new StringTokenizer(Mac, "-"); for(int i = 0;
+		 * tokens.hasMoreElements(); i++) { String temp = tokens.nextToken(); try {
+		 * result[i] = Byte.parseByte(temp, 16); } catch(NumberFormatException e) { int
+		 * error = (Integer.parseInt(temp, 16)) - 256; result[i] = (byte) (error); } }
+		 * return result;
+		 */
+		return false;
+	}
+
 }
