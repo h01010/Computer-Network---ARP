@@ -1,226 +1,245 @@
 package chat_file;
 
-import java.util.ArrayList;
+/**
+ * @author parkmin(R99bbit@github)
+ * @interface  BaseLayer(./BaseLayer.java)
+ */
+
+import java.util.*;
 
 public class IPLayer implements BaseLayer {
-	public int nUpperLayerCount = 0;
-	public int nUnderLayerCount = 0;
-	public String pLayerName = null;
-	public BaseLayer p_UnderLayer = null;
-	public ArrayList<BaseLayer> p_aUnderLayerIP = new ArrayList<BaseLayer>();
-	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-	public final static int IPHEADER = 20;
+    int HeaderSize = 20;
+    
+	public int m_nUpperLayerCount = 0;
+	public String m_pLayerName = null;
+	public BaseLayer mp_UnderLayer = null;
+	public ArrayList<BaseLayer> mp_aUpperLayer = new ArrayList<BaseLayer>();
 	
-	byte[] chatDST_mac = new byte[6];
-	byte[] arpDST_mac = new byte[6];
-	byte[] chatDST_ip = new byte[4];
-	byte[] arpDST_ip = new byte[4];
-	
-	private class _IPLayer_HEADER {
-		byte[] ip_versionLen;	// ip version -> IPv4 : 4
-		byte[] ip_serviceType;	// type of service
-		byte[] ip_packetLen;	// total packet length
-		byte[] ip_datagramID;	// datagram id
-		byte[] ip_offset;		// fragment offset
-		byte[] ip_ttl;			// time to live in gateway hops
-		byte[] ip_protocol;		// IP protocol
-		byte[] ip_cksum;		// header checksum
-		byte[] ip_srcaddr;		// IP address of source
-		byte[] ip_dstaddr;		// IP address of destination
-		byte[] ip_data;			// data
-		
-		public _IPLayer_HEADER(){
-			this.ip_versionLen = new byte[1];
-			this.ip_serviceType = new byte[1];
-			this.ip_packetLen = new byte[2];
-			this.ip_datagramID = new byte[2];
-			this.ip_offset = new byte[2];
-			this.ip_ttl = new byte[1];
-			this.ip_protocol = new byte[1];
-			this.ip_cksum = new byte[2];
-			this.ip_srcaddr = new byte[4];
-			this.ip_dstaddr= new byte[4];
-			this.ip_data = null;		
-		}
-	}
+    IPLayerHeader m_iHeader = new IPLayerHeader();
+    EthernetLayer m_EthernetLayer;
+    
+    /**
+     * IP Layer Packet Header
+     * @class IPLayerHeader
+     */
+    private class IPLayerHeader {
+        byte ip_version_and_len; // ip protocol version number and IHL(Internet Header Length)
+        byte ip_service_type; // TOS(type of service)
+        byte[] ip_total_len; // TL(Total Length)
+        byte[] ip_id; // Identification(like sequence number)
+        byte[] ip_flag; // fragmentation
+        byte ip_ttl; // life cycle
+        byte ip_protocol; // upper layer data
+        byte[] ip_checksum; // checksum
+        byte[] src; // source
+        byte[] dest; // destination
 
-	 _IPLayer_HEADER m_sHeader = new _IPLayer_HEADER();
+        public void setSrc(byte[] src) {
+            this.src = src;
+        }
 
-	public IPLayer(String pName) {
-		// super(pName);
-		// TODO Auto-generated constructor stub
-		pLayerName = pName;
-		m_sHeader = new _IPLayer_HEADER(); 
-	}
-	
-	public void SetIPSrcAddress(byte[] srcAddress) {
-		// TODO Auto-generated method stub
-		m_sHeader.ip_srcaddr[0]= srcAddress[0];
-		m_sHeader.ip_srcaddr[1]= srcAddress[1];
-		m_sHeader.ip_srcaddr[2]= srcAddress[2];
-		m_sHeader.ip_srcaddr[3]= srcAddress[3];
+        public void setDest(byte[] dest) {
+            this.dest = dest;
+        }
 
-	}
+        public IPLayerHeader() {
+            ip_total_len = new byte[2];
+            ip_id = new byte[2];
+            ip_flag = new byte[2];
+            ip_checksum = new byte[2];
+            src = new byte[4];
+            dest = new byte[4];
+        }
+    }
 
-	public void SetIPDstAddress(byte[] dstAddress) {
-		// TODO Auto-generated method stub
-		m_sHeader.ip_dstaddr[0]= dstAddress[0];
-		m_sHeader.ip_dstaddr[1]= dstAddress[1];
-		m_sHeader.ip_dstaddr[2]= dstAddress[2];
-		m_sHeader.ip_dstaddr[3]= dstAddress[3];
+    public void setSrc(byte[] src) {
+        this.m_iHeader.setSrc(src);
+    }
 
-	}
+    public void setDest(byte[] dest) {
+        this.m_iHeader.setDest(dest);
+    }
 
-	public byte[] ObjToByte(_IPLayer_HEADER Header, byte[] input, int length) {
-		byte[] buf = new byte[length + IPHEADER];
-
-		buf[0] = Header.ip_versionLen[0];
-		buf[1] = Header.ip_serviceType[0];
-		buf[2] = Header.ip_packetLen[0];
-		buf[3] = Header.ip_packetLen[1];
-		buf[4] = Header.ip_datagramID[0];
-		buf[5] = Header.ip_datagramID[1];
-		buf[6] = Header.ip_offset[0];
-		buf[7] = Header.ip_offset[1];
-		buf[8] = Header.ip_ttl[0];
-		buf[9] = Header.ip_protocol[0];
-		buf[10] = Header.ip_cksum[0];
-		buf[11] = Header.ip_cksum[1];
-		for (int i = 0; i < 4; i++) {
-			buf[12 + i] = Header.ip_srcaddr[i];
-			buf[16 + i] = Header.ip_dstaddr[i];
-		}
-		for (int i = 0; i < length; i++) {
-			buf[IPHEADER + i] = input[i];
-		}
-		return buf;
-	}
-
-	
-public boolean Send(byte[] input, int length) {
-		
-//	   System.out.println("IP send input length : "+input.length);
-		
-		if((input[2]==(byte)0x20 && input[3]==(byte)0x80) || (input[2]==(byte)0x20 && input[3]==(byte)0x90) ) {
-			m_sHeader.ip_offset[0] = 0x00;
-			m_sHeader.ip_offset[1] = 0x03;
-			
-			byte[] bytes = ObjToByte(m_sHeader,input,length);
-			this.GetUnderLayer(1).Send(bytes,length+IPHEADER);
-			return true;
-			
-		}else if(input[2]==(byte)0x20 && input[3]==(byte)0x70){
-			byte[] opcode = new byte[2];
-			opcode[0] = (byte)0x00;
-			opcode[1] = (byte)0x04;
-			
-			byte[] macAdd = new byte[6];
-			System.arraycopy(input, 24, macAdd, 0,6); //garp의 mac주소 뽑아내기
-			byte[] bytes = ObjToByte(m_sHeader,input,length);
-//			System.out.println("GARP : TCP->IP send");
-			
-			
-			((ARPLayer)this.GetUnderLayer(0)).Send(input, input.length);
-
-			return true;
-			
-		}
-		else {
-			byte[] opcode = new byte[2];
-			opcode[0] = (byte)0x00;
-			opcode[1] = (byte)0x01;
-			byte[] bytes = ObjToByte(m_sHeader,input,length);
-//			System.out.println("ARP : TCP->IP->ARP send");
-			((ARPLayer)this.GetUnderLayer(0)).Send(input, input.length);
-
-			return true;
-		}
-	}
+    public void setEthernetLayer(EthernetLayer m_EthernetLayer) {
+        this.m_EthernetLayer = m_EthernetLayer;
+    }
 
 
-	public byte[] RemoveCappHeader(byte[] input, int length) {
-		
-		byte[] remvHeader = new byte[length-20];
-		for(int i=0;i<length-20;i++) {
-			remvHeader[i] = input[i+20];
-		}
-		return remvHeader;// 변경하세요 필요하시면
-	}
+    public IPLayer(String pName){
+        this.m_pLayerName = pName;
+        ResetHeader();
+    }
 
-	public synchronized boolean Receive(byte[] input) {
-		
-		System.out.println("IP receive input length : "+input.length);
-		byte[] data = RemoveCappHeader(input, input.length);
-	
-		if(srcme_Addr(input)) {
-			return false;
-		}
-		if(dstme_Addr(input)) {
-			this.GetUpperLayer(0).Receive(data);
-			return true;
-		}
-		return false;
-	}
+    public void ResetHeader() {
+        this.m_iHeader.ip_version_and_len = (0x04 << 4);
+        this.m_iHeader.ip_version_and_len += (byte) HeaderSize;
+    }
+    
+    /**
+     * This method will set frame total length
+     * @param ip_total_len
+     */
+    void update_ip_total_len(int ip_total_len){
+        m_iHeader.ip_total_len[0] = (byte) (ip_total_len >> 8);
+        m_iHeader.ip_total_len[1] = (byte) (ip_total_len);
+    }
+    
+	/**
+	 * This method will switch object to byte
+	 * @return {byte} swapped byte
+	 */
+    public byte[] ObjToByte(byte[] input, int length){
+        byte[] buffer = new byte[length + HeaderSize];
+        int beforeHeaderSize = 0;
+        
+        update_ip_total_len(length + HeaderSize);
+        
+        /* copy header */
+        buffer[beforeHeaderSize++] = this.m_iHeader.ip_version_and_len;
+        buffer[beforeHeaderSize++] = this.m_iHeader.ip_service_type;
 
-	public boolean dstme_Addr(byte[] add) {//주소확인
-		for(int i = 0;i<4;i++) {
-			if(add[i+16]!=m_sHeader.ip_srcaddr[i]) return false;
-		}
+        System.arraycopy(this.m_iHeader.ip_total_len, 0, buffer, beforeHeaderSize, this.m_iHeader.ip_total_len.length);
+        beforeHeaderSize += this.m_iHeader.ip_total_len.length;
 
-		return true;
-	}
-	public boolean srcme_Addr(byte[] add) {//주소확인
-		for(int i = 0;i<4;i++) {
-			if(add[i+12]!=m_sHeader.ip_srcaddr[i]) return false;
-		}
+        System.arraycopy(this.m_iHeader.ip_id, 0, buffer, beforeHeaderSize, this.m_iHeader.ip_id.length);
+        beforeHeaderSize += this.m_iHeader.ip_id.length;
 
-		return true;
-	}
-	
+        System.arraycopy(this.m_iHeader.ip_flag, 0, buffer, beforeHeaderSize, this.m_iHeader.ip_flag.length);
+        beforeHeaderSize += this.m_iHeader.ip_flag.length;
+
+        buffer[beforeHeaderSize++] = this.m_iHeader.ip_ttl;
+        buffer[beforeHeaderSize++] = this.m_iHeader.ip_protocol;
+
+        System.arraycopy(this.m_iHeader.ip_checksum, 0, buffer, beforeHeaderSize, this.m_iHeader.ip_checksum.length);
+        beforeHeaderSize += this.m_iHeader.ip_checksum.length;
+
+        System.arraycopy(this.m_iHeader.src, 0, buffer, beforeHeaderSize, this.m_iHeader.src.length);
+        beforeHeaderSize += this.m_iHeader.src.length;
+
+
+        System.arraycopy(this.m_iHeader.dest, 0, buffer, beforeHeaderSize, this.m_iHeader.dest.length);
+        
+        for (int i = 0; i < length; i++){
+            buffer[i + HeaderSize] = input[i];
+        }
+
+        return buffer;
+    }
+
+	/**
+	 * This method will remove packet header
+	 * @return {byte} removed byte
+	 */
+    public byte[] removeHeader(byte[] input) {
+        int inputLength = input.length;
+        byte[] buf = new byte[inputLength - HeaderSize];
+
+        for (int i = HeaderSize; i < inputLength; i++) {
+            buf[i - HeaderSize] = input[i];
+        }
+        return buf;
+    }
+
+    
+	/**
+	 * This method will return current layer's name
+	 * @return {String} layer name
+	 */
 	@Override
 	public String GetLayerName() {
-		// TODO Auto-generated method stub
-		return pLayerName;
+		return this.m_pLayerName;
 	}
-
+	
+	/**
+	 * This method returns the previous layer
+	 * @return {BaseLayer} just previous layer(under 1 level)
+	 */
 	@Override
 	public BaseLayer GetUnderLayer() {
-		return null;
+		boolean isUnderLayerExist = (this.mp_UnderLayer != null); // cond about under layer exsitence
+		if(isUnderLayerExist) { // if under layer founded
+			return this.mp_UnderLayer; // return under layer(just 1 level)
+		} else {
+			return null; // if not founded -> then, return null object
+		}
 	}
 
+	/**
+	 * This method returns the previous layer
+	 * @return {BaseLayer} upper layer(as much as the entered value at nindex)
+	 */
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		// TODO Auto-generated method stub
-		if (nindex < 0 || nindex > nUpperLayerCount || nUpperLayerCount < 0)
+		boolean isUpperLayerNotExist = (nindex < 0 || nindex > this.m_nUpperLayerCount || this.m_nUpperLayerCount < 0); // condition that about upper layer
+		if(isUpperLayerNotExist) {
 			return null;
-		return p_aUpperLayer.get(nindex);
+		} else {
+			return this.mp_aUpperLayer.get(nindex);
+		}
 	}
-
+	
+	/**
+	 * This method will set what the under layer is
+	 * @return {void}
+	 */
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
-		// TODO Auto-generated method stub
-		if (pUnderLayer == null)
+		boolean isUnderLayerExist = (this.mp_UnderLayer != null);
+		if(isUnderLayerExist) {
+			this.mp_UnderLayer = pUnderLayer; // set by argument
+		} else {
 			return;
-		this.p_aUnderLayerIP.add(nUnderLayerCount++, pUnderLayer);
+		}
 	}
-
+	
+	/**
+	 * This method will set what the upper layer is
+	 * @return {void}
+	 */
+	@Override
 	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		// TODO Auto-generated method stub
-		if (pUpperLayer == null)
+		boolean isUpperLayerExist = (this.mp_aUpperLayer != null);
+		if(isUpperLayerExist) {
+			this.mp_aUpperLayer.add(this.m_nUpperLayerCount, pUpperLayer);
+			this.m_nUpperLayerCount += 1;
+		} else {
 			return;
-		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
-		// nUpperLayerCount++;
-
+		}
 	}
+	
+	/**
+	 * This method places the layer entered as an argument on itself
+	 * @return {void}
+	 */
 	@Override
 	public void SetUpperUnderLayer(BaseLayer pUULayer) {
 		this.SetUpperLayer(pUULayer);
-		this.SetUnderLayer(pUULayer);
+		pUULayer.SetUnderLayer(this);
 	}
+	
+	/**
+	 * This method will send packet to upper layer
+	 */
+	public boolean Send(byte[] input, int length) {
+		byte[] buf = ObjToByte(input, input.length);
 
-	public BaseLayer GetUnderLayer(int nindex) {
-		if (nindex < 0 || nindex > nUnderLayerCount || nUnderLayerCount < 0)
-			return null;
-		return p_aUnderLayerIP.get(nindex);
+		if(length == 0){
+		    return this.GetUnderLayer().Send(buf, buf.length);
+		}else{
+		    return m_EthernetLayer.Send(buf, buf.length);
+		}
+	}
+	
+	/**
+	 * This method will send packet to under layer
+	 */
+	public synchronized boolean Receive(byte[] input) {
+		int startOfDestIp = 16;
+		byte[] targetIp = new byte[]{
+			input[startOfDestIp], input[startOfDestIp+ 1], input[startOfDestIp + 2], input[startOfDestIp + 3]};
+		if(Arrays.equals(targetIp, this.m_iHeader.src)){
+		    return this.GetUpperLayer(0).Receive(removeHeader(input));
+		}
+		return false;
 	}
 }
