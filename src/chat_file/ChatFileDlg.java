@@ -147,24 +147,42 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					dstIpAddress.setEditable(true);
 				} else {
 					// ���� �ʿ� : �ش� �κ� IP address�� ���Ͽ� �۾��� �ϵ��� �����ؾ���!
-					byte[] srcAddress = new byte[6];
-					byte[] dstAddress = new byte[6];
+					byte[] ipSrcAddress = new byte[4];
+					byte[] ipDstAddress = new byte[4];
 
-					String src = srcIpAddress.getText();
-					String dst = dstIpAddress.getText();
+					String ip_src = srcIpAddress.getText();
+					String ip_dst = dstIpAddress.getText();
+					String mac_src = srcMacAddress.getText();
+					String mac_dst = "ff-ff-ff-ff-ff-ff";
 
-					String[] byte_src = src.split("-");
-					for (int i = 0; i < 6; i++) {
-						srcAddress[i] = (byte) Integer.parseInt(byte_src[i], 16);
+					String[] byte_ip_src = ip_src.split(".");
+					for (int i = 0; i < 4; i++) {
+						ipSrcAddress[i] = (byte) Integer.parseInt(byte_ip_src[i]);
 					}
 
-					String[] byte_dst = dst.split("-");
+					String[] byte_ip_dst = ip_dst.split(".");
+					for (int i = 0; i < 4; i++) {
+						ipDstAddress[i] = (byte) Integer.parseInt(byte_ip_dst[i]);
+					}
+					
+					byte[] macSrcAddress = new byte[6];
+					byte[] macDstAddress = new byte[6];
+					
+					String[] byte_mac_src = mac_src.split("-");
 					for (int i = 0; i < 6; i++) {
-						dstAddress[i] = (byte) Integer.parseInt(byte_dst[i], 16);
+						ipSrcAddress[i] = (byte) Integer.parseInt(byte_mac_src[i], 16);
 					}
 
-//					((EthernetLayer) m_LayerMgr.GetLayer("Ethernet")).SetEnetSrcAddress(srcAddress);
-//					((EthernetLayer) m_LayerMgr.GetLayer("Ethernet")).SetEnetDstAddress(dstAddress);
+					String[] byte_mac_dst = mac_dst.split("-");
+					for (int i = 0; i < 6; i++) {
+						ipDstAddress[i] = (byte) Integer.parseInt(byte_mac_dst[i], 16);
+					}
+					
+					
+					((IPLayer) m_LayerMgr.GetLayer("IP")).SetIPSrcAddress(ipSrcAddress);
+					((IPLayer) m_LayerMgr.GetLayer("IP")).SetIPDstAddress(ipDstAddress);
+					((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetSrcAddress(macSrcAddress);
+					((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetDstAddress(macDstAddress);
 
 					((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(selected_index);
 
