@@ -99,20 +99,6 @@ public class TCPLayer implements BaseLayer{
 	}
 	
 	@Override
-	public void SetUnderLayer(BaseLayer pUnderLayer) {
-		if (pUnderLayer == null)
-			return;
-		this.p_UnderLayer = pUnderLayer;
-	}
-
-	@Override
-	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		if (pUpperLayer == null)
-			return;
-		this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
-	}
-
-	@Override
 	public String GetLayerName() {
 		// TODO Auto-generated method stub
 		return pLayerName;
@@ -120,21 +106,39 @@ public class TCPLayer implements BaseLayer{
 
 	@Override
 	public BaseLayer GetUnderLayer() {
-		if (this.p_UnderLayer == null)
-			return null;
-		return this.p_UnderLayer;
+	    if(p_UnderLayer == null) {
+	        return null;
+	    }
+	    return p_UnderLayer;
 	}
 
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		if (nindex < 0 || nindex > this.nUpperLayerCount || this.nUpperLayerCount < 0)
-			return null;
-		return this.p_aUpperLayer.get(nindex);
+	    if(nindex < 0 || nindex > nUpperLayerCount || nUpperLayerCount < 0) {
+	        return null;
+	    }
+		return p_aUpperLayer.get(nindex);
+	}
+
+	@Override
+	public void SetUnderLayer(BaseLayer pUnderLayer) {
+        if(pUnderLayer == null) {
+            return;
+        }
+        this.p_UnderLayer = pUnderLayer;
+	}
+
+	@Override
+	public void SetUpperLayer(BaseLayer pUpperLayer) {
+	    if(pUpperLayer == null) {
+	        return;
+	    }
+	    this.p_aUpperLayer.add(nUpperLayerCount++, pUpperLayer);
 	}
 
 	@Override
 	public void SetUpperUnderLayer(BaseLayer pUULayer) {
-		this.SetUpperLayer(pUULayer);
-		pUULayer.SetUnderLayer(this);
+        this.SetUpperLayer(pUULayer);
+        pUULayer.SetUnderLayer(this);
 	}
 }

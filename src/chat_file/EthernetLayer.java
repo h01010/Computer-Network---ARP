@@ -50,7 +50,7 @@ public class EthernetLayer implements BaseLayer {
 		}
 	}
 
-	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// data�뿉 �뿤�뜑 遺숈뿬二쇨린
+	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// data占쎈퓠 占쎈엘占쎈쐭 �겫�늿肉т틠�눊由�
 		byte[] buf = new byte[length + 14];
 		for (int i = 0; i < 6; i++) {
 			buf[i] = Header.enet_dstaddr.addr[i];
@@ -64,7 +64,7 @@ public class EthernetLayer implements BaseLayer {
 		return buf;
 	}
 
-	// 釉뚮줈�뱶 罹먯뒪�듃�씪 寃쎌슦, type�씠 0xff
+	// �뇡�슢以덌옙諭� 筌�癒��뮞占쎈뱜占쎌뵬 野껋럩�뒭, type占쎌뵠 0xff
 	public boolean Send(byte[] input, int length) {
 		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
 			m_sHeader.enet_type = intToByte2(0x01ff);
@@ -135,7 +135,7 @@ public class EthernetLayer implements BaseLayer {
 		for (int i = 0; i < 6; i++)
 			if (bytes[i] != (byte) 0xff)
 				return false;
-		return (bytes[12] == (byte) 0xff && bytes[13] == (byte) 0xff);
+		return true;
 	}
 
 	private boolean isMyPacket(byte[] input) {

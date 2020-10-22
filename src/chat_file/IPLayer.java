@@ -185,7 +185,7 @@ public class IPLayer implements BaseLayer {
 	@Override
 	public void SetUnderLayer(BaseLayer pUnderLayer) {
 		boolean isUnderLayerExist = (this.mp_UnderLayer != null);
-		if(isUnderLayerExist) {
+		if(!isUnderLayerExist) {
 			this.mp_UnderLayer = pUnderLayer; // set by argument
 		} else {
 			return;
@@ -199,7 +199,7 @@ public class IPLayer implements BaseLayer {
 	@Override
 	public void SetUpperLayer(BaseLayer pUpperLayer) {
 		boolean isUpperLayerExist = (this.mp_aUpperLayer != null);
-		if(isUpperLayerExist) {
+		if(!isUpperLayerExist) {
 			this.mp_aUpperLayer.add(this.m_nUpperLayerCount, pUpperLayer);
 			this.m_nUpperLayerCount += 1;
 		} else {
@@ -222,12 +222,7 @@ public class IPLayer implements BaseLayer {
 	 */
 	public boolean Send(byte[] input, int length) {
 		byte[] buf = ObjToByte(input, input.length);
-
-		if(length == 0){
-		    return this.GetUnderLayer().Send(buf, buf.length);
-		}else{
-		    return m_EthernetLayer.Send(buf, buf.length);
-		}
+		return this.GetUnderLayer().Send(buf, buf.length);
 	}
 	
 	/**

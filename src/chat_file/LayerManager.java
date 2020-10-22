@@ -112,7 +112,6 @@ public class LayerManager {
 				else{
 					char cMode = pNode.token.charAt(0); //*GUI -> *
 					String pcName = pNode.token.substring(1, pNode.token.length()); //*GUI -> GUI
-					
 					pLayer = GetLayer (pcName); //Name으로 Layer 가져오기
 					
 					switch(cMode){
