@@ -170,12 +170,12 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					
 					String[] byte_mac_src = mac_src.split("-");
 					for (int i = 0; i < 6; i++) {
-						ipSrcAddress[i] = (byte) Integer.parseInt(byte_mac_src[i], 16);
+						macSrcAddress[i] = (byte) Integer.parseInt(byte_mac_src[i], 16);
 					}
 
 					String[] byte_mac_dst = mac_dst.split("-");
 					for (int i = 0; i < 6; i++) {
-						ipDstAddress[i] = (byte) Integer.parseInt(byte_mac_dst[i], 16);
+						macDstAddress[i] = (byte) Integer.parseInt(byte_mac_dst[i], 16);
 					}
 					
 					
