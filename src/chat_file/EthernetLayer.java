@@ -1,6 +1,5 @@
 package chat_file;
 
-
 import java.util.ArrayList;
 
 public class EthernetLayer implements BaseLayer {
@@ -9,8 +8,7 @@ public class EthernetLayer implements BaseLayer {
 	public String pLayerName = null;
 	public BaseLayer p_UnderLayer = null;
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
-	_ETHERNET_Frame m_sHeader;
-
+	
 	public EthernetLayer(String pName) {
 		// super(pName);
 		// TODO Auto-generated constructor stub
@@ -19,7 +17,7 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	public void ResetHeader() {
-		m_sHeader = new _ETHERNET_Frame();
+		m_sHeader = new _ETHERNET_HEADER();
 	}
 
 	private class _ETHERNET_ADDR {
@@ -32,17 +30,16 @@ public class EthernetLayer implements BaseLayer {
 			this.addr[3] = (byte) 0x00;
 			this.addr[4] = (byte) 0x00;
 			this.addr[5] = (byte) 0x00;
-
 		}
 	}
 
-	private class _ETHERNET_Frame {
+	private class _ETHERNET_HEADER {
 		_ETHERNET_ADDR enet_dstaddr;
 		_ETHERNET_ADDR enet_srcaddr;
 		byte[] enet_type;
 		byte[] enet_data;
 
-		public _ETHERNET_Frame() {
+		public _ETHERNET_HEADER() {
 			this.enet_dstaddr = new _ETHERNET_ADDR();
 			this.enet_srcaddr = new _ETHERNET_ADDR();
 			this.enet_type = new byte[2];
@@ -50,7 +47,10 @@ public class EthernetLayer implements BaseLayer {
 		}
 	}
 
-	public byte[] ObjToByte(_ETHERNET_Frame Header, byte[] input, int length) {// data占쎈퓠 占쎈엘占쎈쐭 �겫�늿肉т틠�눊由�
+	_ETHERNET_HEADER m_sHeader = new _ETHERNET_HEADER();
+
+
+	public byte[] ObjToByte(_ETHERNET_HEADER Header, byte[] input, int length) {// data에 헤더 붙여주기
 		byte[] buf = new byte[length + 14];
 		for (int i = 0; i < 6; i++) {
 			buf[i] = Header.enet_dstaddr.addr[i];
@@ -64,14 +64,78 @@ public class EthernetLayer implements BaseLayer {
 		return buf;
 	}
 
-	// �뇡�슢以덌옙諭� 筌�癒��뮞占쎈뱜占쎌뵬 野껋럩�뒭, type占쎌뵠 0xff
 	public boolean Send(byte[] input, int length) {
-		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
-			m_sHeader.enet_type = intToByte2(0x01ff);
-		else // nomal
-			m_sHeader.enet_type = intToByte2(0x0101);
+		if(input.length>1500) {				//MTU 초과시 전송 불가! MTU : 1500bytes
+			return false;
+		}
+		for(int i = 0; i<6; i++) {
+			if(m_sHeader.enet_dstaddr.addr[i]!=0xff) {
+				//not Broadcast, it's data
+				m_sHeader.enet_type[0] = 0x08;
+				m_sHeader.enet_type[1] = 0x00;
+				byte[] bytes = ObjToByte(m_sHeader, input, length);
+				return this.GetUnderLayer().Send(bytes, length + 14);
+			}
+		}
+		//else : it's request or reply
+		m_sHeader.enet_type[0] = 0x08;
+		m_sHeader.enet_type[1] = 0x06;
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
-		this.GetUnderLayer().Send(bytes, length + 14);
+		return this.GetUnderLayer().Send(bytes, length + 14);
+	}
+
+	public boolean Receive(byte[] input) {
+		byte[] data;
+		boolean MyPacket, Mine, Broadcast;
+		MyPacket = IsItMyPacket(input);
+
+		if (MyPacket == true) { // 본인이 송신한 패킷인 경우
+			return false;
+		} else {
+			Broadcast = IsItBroadcast(input);
+			if (Broadcast == false) { // Broadcast 아니면서
+				Mine = IsItMine(input);
+				if (Mine == false) { // 목적지가 자신이 아닌 경우
+					return false;
+				}
+			}
+		}
+
+		// Broadcast 혹은 자신이 목적지인 경우
+		if (input[12] == 0x08 && input[13] == 0x00) {	//it's data -> IP layer
+			data = this.RemoveEthernetHeader(input, input.length);
+			this.GetUpperLayer(0).Receive(data);
+		} else if (input[12] == 0x08 && input[13] == 0x06) {	//it's reply or request -> ARP layer
+			data = this.RemoveEthernetHeader(input, input.length);
+			this.GetUpperLayer(1).Receive(data);
+		}
+		return true;
+	}
+
+	private boolean IsItMyPacket(byte[] input) {
+		for(int i = 0; i<6; i++) {
+			if(m_sHeader.enet_srcaddr.addr[i] != input[i+6]) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean IsItBroadcast(byte[] input) {
+		for(int i = 0; i<6; i++) {
+			if(input[i] != 0xff) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean IsItMine(byte[] input) {
+		for(int i = 0; i<6; i++) {
+			if(m_sHeader.enet_dstaddr.addr[i] != input[i]) {
+				return false;
+			}
+		}
 		return true;
 	}
 
@@ -80,77 +144,6 @@ public class EthernetLayer implements BaseLayer {
 		System.arraycopy(input, 14, cpyInput, 0, length - 14);
 		input = cpyInput;
 		return input;
-	}
-
-	public boolean fileSend(byte[] input, int length) {
-		if (isBroadcast(m_sHeader.enet_dstaddr.addr)) // broadcast
-			m_sHeader.enet_type = intToByte2(0x02ff);
-		else // nomal
-			m_sHeader.enet_type = intToByte2(0x0201);
-		byte[] bytes = ObjToByte(m_sHeader, input, length);
-		this.GetUnderLayer().Send(bytes, length + 14);
-		return true;
-	}
-
-	public synchronized boolean Receive(byte[] input) {
-		byte[] data;
-		byte[] temp_src = m_sHeader.enet_srcaddr.addr;
-		int temp_type = byte2ToInt(input[12], input[13]);
-
-		if (temp_type < 0x0200) {
-			if (temp_type == 0x0101) {
-				if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
-					data = this.RemoveEthernetHeader(input, input.length);
-					this.GetUpperLayer(0).Receive(data);
-					return true;
-				}
-			}
-			return false;
-		}else if (temp_type < 0x0300) {
-			if (temp_type == 0x0201) {
-				if (chkAddr(input) || (isBroadcast(input)) || !isMyPacket(input)) {
-					data = this.RemoveEthernetHeader(input, input.length);
-					this.GetUpperLayer(1).Receive(data);
-					return true;
-				}
-			}
-			return false; 
-		}
-		return false;
-	}
-
-	private byte[] intToByte2(int value) {
-		byte[] temp = new byte[2];
-		temp[0] |= (byte) ((value & 0xFF00) >> 8);
-		temp[1] |= (byte) (value & 0xFF);
-
-		return temp;
-	}
-
-	private int byte2ToInt(byte value1, byte value2) {
-		return (int) ((value1 << 8) | (value2));
-	}
-
-	private boolean isBroadcast(byte[] bytes) {
-		for (int i = 0; i < 6; i++)
-			if (bytes[i] != (byte) 0xff)
-				return false;
-		return true;
-	}
-
-	private boolean isMyPacket(byte[] input) {
-		for (int i = 0; i < 6; i++)
-			if (m_sHeader.enet_srcaddr.addr[i] != input[6 + i])
-				return false;
-		return true;
-	}
-
-	private boolean chkAddr(byte[] input) {
-		byte[] temp = m_sHeader.enet_srcaddr.addr;
-		for (int i = 0; i < 6; i++)
-			if (m_sHeader.enet_srcaddr.addr[i] != input[i])
-				return false;
-		return true;
 	}
 
 	public void SetEnetSrcAddress(byte[] srcAddress) {
