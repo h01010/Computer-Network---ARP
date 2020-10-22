@@ -120,7 +120,7 @@ public boolean Send(byte[] input, int length) {
 //			System.out.println("GARP : TCP->IP send");
 			
 			
-			((ARPLayer)this.GetUnderLayer(0)).Send(m_sHeader.ip_srcaddr,m_sHeader.ip_srcaddr,macAdd,new byte[6],opcode);
+			((ARPLayer)this.GetUnderLayer(0)).Send(input, input.length);
 
 			return true;
 			
@@ -131,7 +131,7 @@ public boolean Send(byte[] input, int length) {
 			opcode[1] = (byte)0x01;
 			byte[] bytes = ObjToByte(m_sHeader,input,length);
 //			System.out.println("ARP : TCP->IP->ARP send");
-			((ARPLayer)this.GetUnderLayer(0)).Send(m_sHeader.ip_srcaddr,m_sHeader.ip_dstaddr,new byte[6],new byte[6],opcode);
+			((ARPLayer)this.GetUnderLayer(0)).Send(input, input.length);
 
 			return true;
 		}
