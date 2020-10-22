@@ -185,6 +185,9 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					((IPLayer) m_LayerMgr.GetLayer("IP")).setDest(ipDstAddress);
 					((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetSrcAddress(macSrcAddress);
 					((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetDstAddress(macDstAddress);
+					((ARPLayer) m_LayerMgr.GetLayer("ARP")).setSrcIP(ipSrcAddress);
+					((ARPLayer) m_LayerMgr.GetLayer("ARP")).setDstIP(ipDstAddress);
+					((ARPLayer) m_LayerMgr.GetLayer("ARP")).setSrcMac(macSrcAddress);
 
 					((NILayer) m_LayerMgr.GetLayer("NI")).SetAdapterNumber(selected_index);
 

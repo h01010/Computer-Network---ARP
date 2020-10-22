@@ -221,6 +221,7 @@ public class IPLayer implements BaseLayer {
 	 * This method will send packet to upper layer
 	 */
 	public boolean Send(byte[] input, int length) {
+		System.out.println("IPLayer Send");
 		byte[] buf = ObjToByte(input, input.length);
 		return this.GetUnderLayer().Send(buf, buf.length);
 	}
@@ -229,9 +230,17 @@ public class IPLayer implements BaseLayer {
 	 * This method will send packet to under layer
 	 */
 	public synchronized boolean Receive(byte[] input) {
+		System.out.println("IP Receive");
 		int startOfDestIp = 16;
-		byte[] targetIp = new byte[]{
-			input[startOfDestIp], input[startOfDestIp+ 1], input[startOfDestIp + 2], input[startOfDestIp + 3]};
+		/*
+		 * byte[] targetIp = new byte[]{ input[startOfDestIp], input[startOfDestIp+ 1],
+		 * input[startOfDestIp + 2], input[startOfDestIp + 3]};
+		 */
+		byte[] targetIp = new byte[4];
+		System.arraycopy(input, 16, targetIp, 0, 4);
+		for(int i=0; i<4; i++) {
+			System.out.println(targetIp[i]+"\t"+this.m_iHeader.src[i]);
+		}
 		if(Arrays.equals(targetIp, this.m_iHeader.src)){
 		    return this.GetUpperLayer(0).Receive(removeHeader(input));
 		}

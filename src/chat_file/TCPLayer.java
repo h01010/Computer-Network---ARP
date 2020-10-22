@@ -11,6 +11,7 @@ public class TCPLayer implements BaseLayer{
 	
 	public TCPLayer(String pName) {
 		pLayerName = pName;
+		this.resetHeader();
 	}
 	
 	//TCP HEADER 데이터
@@ -44,6 +45,10 @@ public class TCPLayer implements BaseLayer{
 	
 	_TCP_HEADER m_sHeader = new _TCP_HEADER();
 	
+	private void resetHeader() {
+		m_sHeader = new _TCP_HEADER();
+	}
+	
 	public byte[] ObjToByte(_TCP_HEADER Header, byte[] input, int length) {// data에 헤더 붙여주기
 		byte[] buf = new byte[length + 24];
 		for (int i = 0; i < 4; i++) {
@@ -74,6 +79,7 @@ public class TCPLayer implements BaseLayer{
 	}
 	
 	public boolean Send(byte[] input, int length) {	//ChatAppLayer에서 TCP Layer 호출 시의 함수
+		System.out.println("TCP Send");
 		m_sHeader.tcp_dport[0] = 0x08;
 		m_sHeader.tcp_dport[1] = 0x20;
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
@@ -87,6 +93,7 @@ public class TCPLayer implements BaseLayer{
 	}
 
 	public boolean Receive(byte[] input) {
+		System.out.println("TCP Receive");
 		byte[] data = this.RemoveTCPHeader(input, input.length);
 		
 		// tcp_dport = 0x0820 : ChatAppLayer; tcp_dport = 0x0830 : FileAppLayer; 

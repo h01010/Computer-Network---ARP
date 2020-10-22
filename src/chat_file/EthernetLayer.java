@@ -1,6 +1,7 @@
 package chat_file;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class EthernetLayer implements BaseLayer {
 
@@ -50,7 +51,7 @@ public class EthernetLayer implements BaseLayer {
 	_ETHERNET_HEADER m_sHeader = new _ETHERNET_HEADER();
 
 
-	public byte[] ObjToByte(_ETHERNET_HEADER Header, byte[] input, int length) {// data에 헤더 붙여주기
+	public byte[] ObjToByte(_ETHERNET_HEADER Header, byte[] input, int length) {// data�뿉 �뿤�뜑 遺숈뿬二쇨린
 		byte[] buf = new byte[length + 14];
 		for (int i = 0; i < 6; i++) {
 			buf[i] = Header.enet_dstaddr.addr[i];
@@ -65,65 +66,71 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	public boolean Send(byte[] input, int length) {
-		if(input.length>1500) {				//MTU 초과시 전송 불가! MTU : 1500bytes
+		System.out.println("Ethernet Send");
+		if(input.length>1500) {				//MTU 珥덇낵�떆 �쟾�넚 遺덇�! MTU : 1500bytes
 			return false;
 		}
 		for(int i = 0; i<6; i++) {
-			if(m_sHeader.enet_dstaddr.addr[i]!=0xff) {
+			if(m_sHeader.enet_dstaddr.addr[i]!=-1) {
+				System.out.println("Ethernet Send Data");
 				//not Broadcast, it's data
-				m_sHeader.enet_type[0] = 0x08;
-				m_sHeader.enet_type[1] = 0x00;
+				m_sHeader.enet_type[0] = 8;			//0x08
+				m_sHeader.enet_type[1] = 0;			//0x00
 				byte[] bytes = ObjToByte(m_sHeader, input, length);
 				return this.GetUnderLayer().Send(bytes, length + 14);
 			}
 		}
 		//else : it's request or reply
-		m_sHeader.enet_type[0] = 0x08;
-		m_sHeader.enet_type[1] = 0x06;
+		System.out.println("Ethernet Send Broadcast");
+		m_sHeader.enet_type[0] = 8;					//0x08
+		m_sHeader.enet_type[1] = 6;					//0x00
 		byte[] bytes = ObjToByte(m_sHeader, input, length);
 		return this.GetUnderLayer().Send(bytes, length + 14);
 	}
 
 	public boolean Receive(byte[] input) {
+		System.out.println("Ethernet Receive");
 		byte[] data;
 		boolean MyPacket, Mine, Broadcast;
 		MyPacket = IsItMyPacket(input);
 
-		if (MyPacket == true) { // 본인이 송신한 패킷인 경우
+		if (MyPacket) { // 蹂몄씤�씠 �넚�떊�븳 �뙣�궥�씤 寃쎌슦
 			return false;
 		} else {
 			Broadcast = IsItBroadcast(input);
-			if (Broadcast == false) { // Broadcast 아니면서
+			if (!Broadcast) { // Broadcast �븘�땲硫댁꽌
 				Mine = IsItMine(input);
-				if (Mine == false) { // 목적지가 자신이 아닌 경우
+				if (!Mine) { // 紐⑹쟻吏�媛� �옄�떊�씠 �븘�땶 寃쎌슦
 					return false;
 				}
 			}
 		}
 
-		// Broadcast 혹은 자신이 목적지인 경우
-		if (input[12] == 0x08 && input[13] == 0x00) {	//it's data -> IP layer
+		// Broadcast �샊�� �옄�떊�씠 紐⑹쟻吏��씤 寃쎌슦
+		if (input[12] == 8 && input[13] == 0) {	//it's data -> IP layer
 			data = this.RemoveEthernetHeader(input, input.length);
+			System.out.println("Ethernet to IP");
 			this.GetUpperLayer(0).Receive(data);
-		} else if (input[12] == 0x08 && input[13] == 0x06) {	//it's reply or request -> ARP layer
+		} else if (input[12] == 8 && input[13] == 6) {	//it's reply or request -> ARP layer
 			data = this.RemoveEthernetHeader(input, input.length);
+			System.out.println("Ethernet to ARP");
 			this.GetUpperLayer(1).Receive(data);
 		}
 		return true;
 	}
 
 	private boolean IsItMyPacket(byte[] input) {
-		for(int i = 0; i<6; i++) {
-			if(m_sHeader.enet_srcaddr.addr[i] != input[i+6]) {
+		byte[] temp = new byte[6];
+		System.arraycopy(input, 6, temp, 0, 6);
+			if(!Arrays.equals(m_sHeader.enet_srcaddr.addr, temp)) {
 				return false;
 			}
-		}
 		return true;
 	}
 
 	private boolean IsItBroadcast(byte[] input) {
 		for(int i = 0; i<6; i++) {
-			if(input[i] != 0xff) {
+			if(input[i] !=-1) {
 				return false;
 			}
 		}
@@ -131,11 +138,11 @@ public class EthernetLayer implements BaseLayer {
 	}
 
 	private boolean IsItMine(byte[] input) {
-		for(int i = 0; i<6; i++) {
-			if(m_sHeader.enet_dstaddr.addr[i] != input[i]) {
+		byte[] temp = new byte[6];
+		System.arraycopy(input, 0, temp, 0, 6);
+			if(!Arrays.equals(m_sHeader.enet_dstaddr.addr, input)) {
 				return false;
 			}
-		}
 		return true;
 	}
 

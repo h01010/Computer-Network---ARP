@@ -5,7 +5,6 @@ import java.awt.GridBagLayout;
 import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.StringTokenizer;
 
 import javax.swing.*;
 import chat_file.ARPLayer.*;
@@ -314,41 +313,23 @@ public class ARPTableDlg extends JFrame {
 
 	
 	// GARP Table 관련 함수
-	JTextArea srcIpAddress;											//수정이 필요한 부분
-	private static LayerManager m_LayerMgr = new LayerManager();	//수정이 필요한 부분
-	
-	public boolean sendMacGARP(String macAddress) {         		//GARP SEND
-		byte[] mac = MACStringToByte(MacAddress.getText());
-		byte[] ipSrcAddress = new byte[4];
-		String ip_src = srcIpAddress.getText();             		// IP Address를 받아옴
-		srcIpAddress.setText(macAddress);                   		// 출력되는 MAC Address 변경
-		String mac_dst = "ff-ff-ff-ff-ff-ff";
-		String[] byte_ip_src = ip_src.split("\\.");
-		for (int i = 0; i < 4; i++) {
-			ipSrcAddress[i] = (byte) Integer.parseInt(byte_ip_src[i]);
-		}
-		byte[] macDstAddress = new byte[6];
-        String[] byte_mac_dst = mac_dst.split("-");
-		for (int i = 0; i < 6; i++) {
-			macDstAddress[i] = (byte) Integer.parseInt(byte_mac_dst[i], 16);
-		}
-		((IPLayer) m_LayerMgr.GetLayer("IP")).setSrc(ipSrcAddress);
-		((IPLayer) m_LayerMgr.GetLayer("IP")).setDest(ipSrcAddress);
-		((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetSrcAddress(mac);
-		((EthernetLayer) m_LayerMgr.GetLayer("ETH")).SetEnetDstAddress(macDstAddress);
-
-//		m_LayerMgr.GetLayer("ARP").Send(bytes, bytes.length);
+	public boolean sendMacGARP(String macAddress) {
+		/*
+		 * //예상 GARP SEND 코드 byte[] mac = MACStringToByte(MacAddress.getText());
+		 * arpLayer.setSrcMac(mac); ethernetLayer.setSrcAddr(mac);
+		 * 
+		 * Send send = new Send(); send.run();
+		 * 
+		 * }
+		 * 
+		 * private byte[] MACStringToByte(String Mac) { byte[] result = new byte[6];
+		 * StringTokenizer tokens = new StringTokenizer(Mac, "-"); for(int i = 0;
+		 * tokens.hasMoreElements(); i++) { String temp = tokens.nextToken(); try {
+		 * result[i] = Byte.parseByte(temp, 16); } catch(NumberFormatException e) { int
+		 * error = (Integer.parseInt(temp, 16)) - 256; result[i] = (byte) (error); } }
+		 * return result;
+		 */
 		return false;
-	}
-	private byte[] MACStringToByte(String Mac) {
-	    byte[] result = new byte[6];
-		StringTokenizer tokens = new StringTokenizer(Mac, ":");
-		for(int i = 0;	i < 6; i++) {
-		    String stringMac = tokens.nextToken();
-		    int num = Integer.parseInt(stringMac, 16);
-		    result[i] = (byte) (num & 0xFF);
-		}
-		return result;
 	}
 
 }

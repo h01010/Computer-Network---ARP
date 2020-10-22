@@ -1,6 +1,7 @@
 package chat_file;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ARPLayer implements BaseLayer{
@@ -201,34 +202,52 @@ public class ARPLayer implements BaseLayer{
 	}
 	
 	public boolean Send(byte[] input, int length) {
+		System.out.println("ARPLayer Send");
 		byte[] dstAddress = KnowDstMac(arpheader.DstIP);
 		byte[] dstAddressInProxyTable = KnowDstMacProxy(arpheader.SrcIP);
 		
 		if (dstAddress != null) {
+			System.out.println("dstAddress Know");
 			this.GetUnderLayer().SetEnetDstAddress(dstAddress);	//Ethernet Layer SetEnetDstAddress Method
-			arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2를 쓰지 않기 위함
+			//arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2를 쓰지 않기 위함
 			arpheader.setDstMac(dstAddress);
+			
+			this.GetUnderLayer().Send(input, length);
 		} else if (dstAddressInProxyTable != null) {
-			arpheader.setOpcode(new byte[] {0x00, 0x05});
+			System.out.println("Proxy dstAddress Know");
+			//arpheader.setOpcode(new byte[] {0x00, 0x05});
 			arpheader.setDstMac(dstAddressInProxyTable);
+			this.GetUnderLayer().Send(input, length);
 		} else {
+			System.out.println("dstAddress don't Know");
 			arpheader.setOpcode(new byte[] {0x00, 0x01});
 			
 			_ARP_CACHE cache = new _ARP_CACHE(arpheader.DstIP, arpheader.DstMac, false);
-			arpTable.ARPTable.add(cache);
+			if(!isInTable(cache)) {
+	            arpTable.ARPTable.add(cache);
+	         }
+			byte[] buf = ObjToByte(arpheader, input, length);
+			this.GetUnderLayer().Send(buf, buf.length);
 		}
-	
-		byte[] buf = ObjToByte(arpheader, input, length);
-		this.GetUnderLayer().Send(buf, buf.length);
-		
 		return true;
 	}
+	
+	private boolean isInTable(_ARP_CACHE cache) {
+	      Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
+	      while (iterator.hasNext()) {
+	         _ARP_CACHE c1 = iterator.next();
+	         if (Arrays.equals(c1.return_IPAddress(), cache.return_IPAddress()) && Arrays.equals(c1.return_MACAddress(), cache.return_MACAddress()) && c1.return_Status() == cache.return_Status()) {
+	            return true;
+	         }
+	      }
+	      return false;
+	   }
 
 	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC 주소를 알고있는지 물어보는 함수
 		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
-			if (cache.return_IPAddress() == dstIP) {
+			if (Arrays.equals(cache.return_IPAddress(), dstIP)) {
 				BigInteger bigInt = new BigInteger(cache.return_MACAddress());
 				if (bigInt.intValue() != -1) {									// -1 == 0xffffffff
 					return cache.return_MACAddress();
@@ -243,7 +262,7 @@ public class ARPLayer implements BaseLayer{
 		Iterator<_PROXYARP_CACHE> iterator = proxyarpTable.PROXYARPTable.iterator();
 		while (iterator.hasNext()) {
 			_PROXYARP_CACHE cache = iterator.next();
-			if (cache.return_IPAddress() == dstIP) {
+			if (Arrays.equals(cache.return_IPAddress(), dstIP)) {
 					return cache.return_MACAddress();
 			}
 			return null;
@@ -252,11 +271,12 @@ public class ARPLayer implements BaseLayer{
 	}
 
 	public boolean Receive(byte[] input) {
+		System.out.println("ARPLayer Receive");
 		byte[] opcode = new byte[2];
 		System.arraycopy(input, 6, opcode, 0, 2);
-		
-		if(opcode[0] == 0x01) {	//request
+		if(opcode[1] == 1) {	//request
 			/* 요청하는것을 받았으니까 현재 받은 호스트 입장에서는 Sender Mac, Sender IP를 궁금해 할 것 같다. */
+			System.out.println("Request");
 			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
 			byte[] targetIP = new byte[4];	//swap를 쓰기 위함
@@ -267,14 +287,18 @@ public class ARPLayer implements BaseLayer{
 			
 			
 			_ARP_CACHE cache = new _ARP_CACHE(senderIP, senderMAC, true);
-			arpTable.ARPTable.add(cache);
+			if(!isInTable(cache)) {
+	            arpTable.ARPTable.add(cache);
+	         }
 			
-			if(senderIP.equals(targetIP)) {		//GARP는 보낸 IP와 받는 IP가 같으므로, if문으로 GARP인지 구분하고, drop한다.
+			if(Arrays.equals(senderIP, targetIP)) {		//GARP는 보낸 IP와 받는 IP가 같으므로, if문으로 GARP인지 구분하고, drop한다.
 				SetDstTrue(senderIP, senderMAC);
 				return true;
 			}
-			
-			if(targetIP == arpheader.SrcIP) {	//request 메세지를 받았을 때 나에게 온 메세지이면 요청한 호스트에서 나의 mac 주소를 알려주어야함
+			if(Arrays.equals(targetIP, arpheader.SrcIP)) {	//request 메세지를 받았을 때 나에게 온 메세지이면 요청한 호스트에서 나의 mac 주소를 알려주어야함
+				System.out.println("reply start!");
+				opcode = new byte[] {0x00, 0x02};
+				System.arraycopy(opcode, 0, input, 6, 2);
 				byte[] swapData = swap(input, senderMAC, senderIP, arpheader.SrcMac, targetIP);
 				GetUnderLayer().Send(swapData, swapData.length);
 			}
@@ -289,6 +313,7 @@ public class ARPLayer implements BaseLayer{
 			/* 응답하는 메세지를 받았으니까 현재 받은 호스트 입장에서는  Sender Mac, Sender IP를 궁금해 할 것 같다.
 			 * 왜냐? 그게 궁금해서 보낸거였으니까
 			 * */
+			System.out.println("Reply");
 			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
 			
@@ -297,6 +322,16 @@ public class ARPLayer implements BaseLayer{
 			
 			SetDstTrue(senderIP, senderMAC);
 			
+			byte[] dstAddress = new byte[6];
+			System.arraycopy(input, 8, dstAddress, 0, 6);
+			for(int i = 0; i < 6; i++) {
+				System.out.println(dstAddress[i]);
+			}
+			this.GetUnderLayer().SetEnetDstAddress(dstAddress);
+			byte[] cpyInput = new byte[input.length - 28];
+			System.arraycopy(input, 28, cpyInput, 0, input.length - 28);
+			input = cpyInput;
+			this.GetUnderLayer().Send(input, input.length);
 		}
 		return true;
 	}
@@ -305,7 +340,7 @@ public class ARPLayer implements BaseLayer{
 		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
-			if (cache.return_IPAddress() == senderIP) {
+			if (Arrays.equals(cache.return_IPAddress(), senderIP)) {
 				cache.setMACAddress(senderMAC);
 				cache.setStatus(true);
 				return;
