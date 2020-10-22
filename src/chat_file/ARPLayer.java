@@ -28,12 +28,12 @@ public class ARPLayer implements BaseLayer{
 		byte[] DstMac = new byte[6];
 		byte[] DstIP = new byte[4];
 		
-		// À¯Æ¿¸®Æ¼¿¡ ÇØ´çÇÏ´Â ºÎºÐµéÀ» »ý¼ºÀÚ·Î Á¤ÇØÁÖ¾ú´Ù.
+		// ï¿½ï¿½Æ¿ï¿½ï¿½Æ¼ï¿½ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ÎºÐµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ï¿½.
 		public _ARP_HEADER() {
-			this.HardwareType[1] = (byte)0x01;	// 0x0001 --> Ethernet Åë½Å ½Ã Ç×»ó 1·Î ¼³Á¤
+			this.HardwareType[1] = (byte)0x01;	// 0x0001 --> Ethernet ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½×»ï¿½ 1ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			this.ProtocolType[0] = (byte)0x08;	// 0x0800 (IPv4) 0x0806 (ARP)
-			this.HardwareLength[0] = (byte)0x06;	// Ethernet¿¡¼­´Â 0x06À¸·Î ¼³Á¤ÇÏ·¡ ¿Ö ÀÎÁö´Â ¸ô¶ó¤¾¤¾
-			this.ProtocolLength[0] = (byte)0x04;	// IPv4ÀÎ °æ¿ì 0x04·Î ¼³Á¤
+			this.HardwareLength[0] = (byte)0x06;	// Ethernetï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0x06ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï·ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ó¤¾¤ï¿½
+			this.ProtocolLength[0] = (byte)0x04;	// IPv4ï¿½ï¿½ ï¿½ï¿½ï¿½ 0x04ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			this.DstMac[0] = (byte)0xff;
 			this.DstMac[1] = (byte)0xff;
 			this.DstMac[2] = (byte)0xff;
@@ -64,7 +64,7 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	 
-	_ARP_HEADER arpheader = new _ARP_HEADER();	//ÇöÀç? ³ªÀÇ? »óÅÂ --> ¾ÏÆ° Receive ÇÔ¼ö¿¡¼­ ¹Þ´Â input°ú ºñ±³ÇÒ ¶§ ÇÊ¿ä
+	_ARP_HEADER arpheader = new _ARP_HEADER();	//ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½? ï¿½ï¿½ï¿½ï¿½ --> ï¿½ï¿½Æ° Receive ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ´ï¿½ inputï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ê¿ï¿½
 	
 	public void setSrcMac(byte[] srcmac) {
 		arpheader.setSrcMac(srcmac);
@@ -109,7 +109,7 @@ public class ARPLayer implements BaseLayer{
 			return this;
 		}
 		
-		//ºñ±³¸¦ ÇÏ±â À§ÇØ °ªÀ» ¸®ÅÏÇØÁÖ´Â ÇÔ¼öµé
+		//ï¿½ñ±³¸ï¿½ ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½
 		public byte[] return_IPAddress() {
 			return this.IPAddress;
 		}
@@ -151,7 +151,7 @@ public class ARPLayer implements BaseLayer{
 			return this;
 		}
 		
-		//ºñ±³¸¦ ÇÏ±â À§ÇØ °ªÀ» ¸®ÅÏÇØÁÖ´Â ÇÔ¼öµé
+		//ï¿½ñ±³¸ï¿½ ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½
 		public byte[] return_IPAddress() {
 			return this.IPAddress;
 		}
@@ -209,7 +209,7 @@ public class ARPLayer implements BaseLayer{
 		if (dstAddress != null) {
 			System.out.println("dstAddress Know");
 			this.GetUnderLayer().SetEnetDstAddress(dstAddress);	//Ethernet Layer SetEnetDstAddress Method
-			//arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2¸¦ ¾²Áö ¾Ê±â À§ÇÔ
+			//arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½ ï¿½ï¿½ï¿½ï¿½
 			arpheader.setDstMac(dstAddress);
 			
 			this.GetUnderLayer().Send(input, length);
@@ -243,7 +243,7 @@ public class ARPLayer implements BaseLayer{
 	      return false;
 	   }
 
-	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC ÁÖ¼Ò¸¦ ¾Ë°íÀÖ´ÂÁö ¹°¾îº¸´Â ÇÔ¼ö
+	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC ï¿½Ö¼Ò¸ï¿½ ï¿½Ë°ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½îº¸ï¿½ï¿½ ï¿½Ô¼ï¿½
 		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
@@ -258,7 +258,7 @@ public class ARPLayer implements BaseLayer{
 		return null;
 	}
 	
-	private byte[] KnowDstMacProxy(byte[] dstIP) {									//DstMAC ÁÖ¼Ò¸¦ ¾Ë°íÀÖ´ÂÁö ¹°¾îº¸´Â ÇÔ¼ö
+	private byte[] KnowDstMacProxy(byte[] dstIP) {									//DstMAC ï¿½Ö¼Ò¸ï¿½ ï¿½Ë°ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½îº¸ï¿½ï¿½ ï¿½Ô¼ï¿½
 		Iterator<_PROXYARP_CACHE> iterator = proxyarpTable.PROXYARPTable.iterator();
 		while (iterator.hasNext()) {
 			_PROXYARP_CACHE cache = iterator.next();
@@ -275,27 +275,26 @@ public class ARPLayer implements BaseLayer{
 		byte[] opcode = new byte[2];
 		System.arraycopy(input, 6, opcode, 0, 2);
 		if(opcode[1] == 1) {	//request
-			/* ¿äÃ»ÇÏ´Â°ÍÀ» ¹Þ¾ÒÀ¸´Ï±î ÇöÀç ¹ÞÀº È£½ºÆ® ÀÔÀå¿¡¼­´Â Sender Mac, Sender IP¸¦ ±Ã±ÝÇØ ÇÒ °Í °°´Ù. */
+			/* ï¿½ï¿½Ã»ï¿½Ï´Â°ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½Æ® ï¿½ï¿½ï¿½å¿¡ï¿½ï¿½ï¿½ï¿½ Sender Mac, Sender IPï¿½ï¿½ ï¿½Ã±ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½. */
 			System.out.println("Request");
 			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
-			byte[] targetIP = new byte[4];	//swap¸¦ ¾²±â À§ÇÔ
+			byte[] targetIP = new byte[4];	//swapï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 			
 			System.arraycopy(input, 8, senderMAC, 0, 6);
 			System.arraycopy(input, 14, senderIP, 0, 4);
 			System.arraycopy(input, 24, targetIP, 0, 4);
 			
 			
+			if(Arrays.equals(senderIP, targetIP)) {		//GARPï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ IPï¿½ï¿½ ï¿½Þ´ï¿½ IPï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½, ifï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ GARPï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½, dropï¿½Ñ´ï¿½.
+				SetDstTrue(senderIP, senderMAC);
+				return true;
+			}
 			_ARP_CACHE cache = new _ARP_CACHE(senderIP, senderMAC, true);
 			if(!isInTable(cache)) {
 	            arpTable.ARPTable.add(cache);
 	         }
-			
-			if(Arrays.equals(senderIP, targetIP)) {		//GARP´Â º¸³½ IP¿Í ¹Þ´Â IP°¡ °°À¸¹Ç·Î, if¹®À¸·Î GARPÀÎÁö ±¸ºÐÇÏ°í, dropÇÑ´Ù.
-				SetDstTrue(senderIP, senderMAC);
-				return true;
-			}
-			if(Arrays.equals(targetIP, arpheader.SrcIP)) {	//request ¸Þ¼¼Áö¸¦ ¹Þ¾ÒÀ» ¶§ ³ª¿¡°Ô ¿Â ¸Þ¼¼ÁöÀÌ¸é ¿äÃ»ÇÑ È£½ºÆ®¿¡¼­ ³ªÀÇ mac ÁÖ¼Ò¸¦ ¾Ë·ÁÁÖ¾î¾ßÇÔ
+			if(Arrays.equals(targetIP, arpheader.SrcIP)) {	//request ï¿½Þ¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½Ã»ï¿½ï¿½ È£ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ mac ï¿½Ö¼Ò¸ï¿½ ï¿½Ë·ï¿½ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½
 				System.out.println("reply start!");
 				opcode = new byte[] {0x00, 0x02};
 				System.arraycopy(opcode, 0, input, 6, 2);
@@ -310,8 +309,8 @@ public class ARPLayer implements BaseLayer{
 			}
 				
 		} else {	//opcode[0] == 0x02	reply
-			/* ÀÀ´äÇÏ´Â ¸Þ¼¼Áö¸¦ ¹Þ¾ÒÀ¸´Ï±î ÇöÀç ¹ÞÀº È£½ºÆ® ÀÔÀå¿¡¼­´Â  Sender Mac, Sender IP¸¦ ±Ã±ÝÇØ ÇÒ °Í °°´Ù.
-			 * ¿Ö³Ä? ±×°Ô ±Ã±ÝÇØ¼­ º¸³½°Å¿´À¸´Ï±î
+			/* ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¾ï¿½ï¿½ï¿½ï¿½Ï±ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È£ï¿½ï¿½Æ® ï¿½ï¿½ï¿½å¿¡ï¿½ï¿½ï¿½ï¿½  Sender Mac, Sender IPï¿½ï¿½ ï¿½Ã±ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+			 * ï¿½Ö³ï¿½? ï¿½×°ï¿½ ï¿½Ã±ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½ï¿½Ï±ï¿½
 			 * */
 			System.out.println("Reply");
 			byte[] senderMAC = new byte[6];
@@ -349,7 +348,7 @@ public class ARPLayer implements BaseLayer{
 	}
 
 	public byte[] swap(byte[] input, byte[] srcmac, byte[] srcip, byte[] tarmac, byte[] tarip) {
-		input[7] = 0x02; //opcode ¼öÁ¤ (opcode reply·Î ¼³Á¤)
+		input[7] = 0x02; //opcode ï¿½ï¿½ï¿½ï¿½ (opcode replyï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
 		System.arraycopy(srcmac, 0, input, 18, 6);
 		System.arraycopy(srcip, 0, input, 24, 4);
 		System.arraycopy(tarmac, 0, input, 8, 6);
