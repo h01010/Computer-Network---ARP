@@ -122,10 +122,7 @@ public class EthernetLayer implements BaseLayer {
 	private boolean IsItMyPacket(byte[] input) {
 		byte[] temp = new byte[6];
 		System.arraycopy(input, 6, temp, 0, 6);
-			if(!Arrays.equals(m_sHeader.enet_srcaddr.addr, temp)) {
-				return false;
-			}
-		return true;
+		return Arrays.equals(m_sHeader.enet_srcaddr.addr, temp);
 	}
 
 	private boolean IsItBroadcast(byte[] input) {
@@ -140,10 +137,7 @@ public class EthernetLayer implements BaseLayer {
 	private boolean IsItMine(byte[] input) {
 		byte[] temp = new byte[6];
 		System.arraycopy(input, 0, temp, 0, 6);
-			if(!Arrays.equals(m_sHeader.enet_dstaddr.addr, input)) {
-				return false;
-			}
-		return true;
+		return Arrays.equals(m_sHeader.enet_srcaddr.addr, input);
 	}
 
 	public byte[] RemoveEthernetHeader(byte[] input, int length) {
