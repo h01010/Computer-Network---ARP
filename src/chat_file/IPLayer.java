@@ -191,12 +191,10 @@ public class IPLayer implements BaseLayer {
 	 */
 	@Override
 	public void SetUpperLayer(BaseLayer pUpperLayer) {
-		boolean isUpperLayerExist = (this.mp_aUpperLayer != null);
-		if(!isUpperLayerExist) {
-			this.mp_aUpperLayer.add(this.m_nUpperLayerCount, pUpperLayer);
-			this.m_nUpperLayerCount += 1;
-		} else {
+		if(pUpperLayer == null) {
 			return;
+		} else {
+			this.mp_aUpperLayer.add(this.m_nUpperLayerCount++, pUpperLayer);	
 		}
 	}
 	
