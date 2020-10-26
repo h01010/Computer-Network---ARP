@@ -16,7 +16,6 @@ public class IPLayer implements BaseLayer {
 	public ArrayList<BaseLayer> mp_aUpperLayer = new ArrayList<BaseLayer>();
 	
     IPLayerHeader m_iHeader = new IPLayerHeader();
-    EthernetLayer m_EthernetLayer;
     
     /**
      * IP Layer Packet Header
@@ -59,11 +58,6 @@ public class IPLayer implements BaseLayer {
     public void setDest(byte[] dest) {
         this.m_iHeader.setDest(dest);
     }
-
-    public void setEthernetLayer(EthernetLayer m_EthernetLayer) {
-        this.m_EthernetLayer = m_EthernetLayer;
-    }
-
 
     public IPLayer(String pName){
         this.m_pLayerName = pName;
