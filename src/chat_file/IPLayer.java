@@ -164,8 +164,7 @@ public class IPLayer implements BaseLayer {
 	 */
 	@Override
 	public BaseLayer GetUpperLayer(int nindex) {
-		boolean isUpperLayerNotExist = (nindex < 0 || nindex > this.m_nUpperLayerCount || this.m_nUpperLayerCount < 0); // condition that about upper layer
-		if(isUpperLayerNotExist) {
+		if(nindex < 0 || nindex > this.m_nUpperLayerCount || this.m_nUpperLayerCount < 0) {
 			return null;
 		} else {
 			return this.mp_aUpperLayer.get(nindex);
