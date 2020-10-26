@@ -140,7 +140,7 @@ public class EthernetLayer implements BaseLayer {
 	private boolean IsItMine(byte[] input) {
 		byte[] temp = new byte[6];
 		System.arraycopy(input, 0, temp, 0, 6);
-			if(!Arrays.equals(m_sHeader.enet_dstaddr.addr, input)) {
+			if(!Arrays.equals(m_sHeader.enet_dstaddr.addr, temp)) {
 				return false;
 			}
 		return true;
