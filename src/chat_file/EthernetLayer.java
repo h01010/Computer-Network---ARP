@@ -90,6 +90,8 @@ public class EthernetLayer implements BaseLayer {
 
 	public boolean Receive(byte[] input) {
 		System.out.println("Ethernet Receive");
+		for(int i = 0; i < 6; i++)
+			System.out.print(input[i]+".");
 		byte[] data;
 		boolean MyPacket, Mine, Broadcast;
 		MyPacket = IsItMyPacket(input);
@@ -101,11 +103,13 @@ public class EthernetLayer implements BaseLayer {
 			if (!Broadcast) { // Broadcast �븘�땲硫댁꽌
 				Mine = IsItMine(input);
 				if (!Mine) { // 紐⑹쟻吏�媛� �옄�떊�씠 �븘�땶 寃쎌슦
+					System.out.println("not mine");
 					return false;
 				}
 			}
 		}
-
+		
+		System.out.println(input[12]+" - "+input[13]);
 		// Broadcast �샊�� �옄�떊�씠 紐⑹쟻吏��씤 寃쎌슦
 		if (input[12] == 8 && input[13] == 0) {	//it's data -> IP layer
 			data = this.RemoveEthernetHeader(input, input.length);
@@ -122,7 +126,10 @@ public class EthernetLayer implements BaseLayer {
 	private boolean IsItMyPacket(byte[] input) {
 		byte[] temp = new byte[6];
 		System.arraycopy(input, 6, temp, 0, 6);
-		return Arrays.equals(m_sHeader.enet_srcaddr.addr, temp);
+			if(!Arrays.equals(m_sHeader.enet_srcaddr.addr, temp)) {
+				return false;
+			}
+		return true;
 	}
 
 	private boolean IsItBroadcast(byte[] input) {
@@ -137,7 +144,7 @@ public class EthernetLayer implements BaseLayer {
 	private boolean IsItMine(byte[] input) {
 		byte[] temp = new byte[6];
 		System.arraycopy(input, 0, temp, 0, 6);
-		return Arrays.equals(m_sHeader.enet_srcaddr.addr, input);
+		return Arrays.equals(m_sHeader.enet_srcaddr.addr, temp);
 	}
 
 	public byte[] RemoveEthernetHeader(byte[] input, int length) {
