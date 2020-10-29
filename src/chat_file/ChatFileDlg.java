@@ -19,6 +19,8 @@ import org.jnetpcap.PcapIf;
 import org.jnetpcap.packet.PcapPacket;
 import org.jnetpcap.packet.PcapPacketHandler;
 
+import chat_file.ARPLayer.*;
+
 
 public class ChatFileDlg extends JFrame implements BaseLayer {
 	public int nUpperLayerCount = 0;
@@ -27,8 +29,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 	public ArrayList<BaseLayer> p_aUpperLayer = new ArrayList<BaseLayer>();
 	
 	String path;
-
-	private static LayerManager m_LayerMgr = new LayerManager();
+	static LayerManager m_LayerMgr = new LayerManager();
 	int selected_index;
 	private JTextField ChattingWrite;
 	private JTextField FileDir_path;
@@ -157,6 +158,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					String mac_src = srcMacAddress.getText();
 					String mac_dst = "ff-ff-ff-ff-ff-ff";
 					
+					
 					String[] byte_ip_src = ip_src.split("\\.");
 					for (int i = 0; i < 4; i++) {
 						ipSrcAddress[i] = (byte) Integer.parseInt(byte_ip_src[i]);
@@ -179,7 +181,6 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					for (int i = 0; i < 6; i++) {
 						macDstAddress[i] = (byte) Integer.parseInt(byte_mac_dst[i], 16);
 					}
-					
 					
 					((IPLayer) m_LayerMgr.GetLayer("IP")).setSrc(ipSrcAddress);
 					((IPLayer) m_LayerMgr.GetLayer("IP")).setDest(ipDstAddress);
@@ -247,7 +248,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 					m_LayerMgr.GetLayer("CHAT").Send(bytes, bytes.length);
 					// p_UnderLayer.Send(bytes, bytes.length);
 				} else {
-					JOptionPane.showMessageDialog(null, "占쌍쇽옙 占쏙옙占쏙옙 占쏙옙占쏙옙");
+					JOptionPane.showMessageDialog(null, "Set Address First");
 				}
 			}
 		});
@@ -297,7 +298,7 @@ public class ChatFileDlg extends JFrame implements BaseLayer {
 				}
 
 				else {
-					JOptionPane.showMessageDialog(null, "占쌍쇽옙 占쏙옙占쏙옙 占쏙옙占쏙옙");
+					JOptionPane.showMessageDialog(null, "set Address First");
 				}
 			}
 		});

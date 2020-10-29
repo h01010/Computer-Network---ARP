@@ -5,8 +5,11 @@ import java.awt.GridBagLayout;
 import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.swing.*;
+
 import chat_file.ARPLayer.*;
 
 public class ARPTableDlg extends JFrame {
@@ -87,7 +90,8 @@ public class ARPTableDlg extends JFrame {
 			this.okBtn.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent arg0) {
-					addProxy(device.getText(), ipAddress.getText(), macAddress.getText());
+					addProxy(device.getText(), ipAddress.getText(),
+							macAddress.getText());
 					readProxy();
 					dispose();
 				}
@@ -129,6 +133,7 @@ public class ARPTableDlg extends JFrame {
 		this.arpTable = new List();
 		this.arpTable.setBounds(10, 20, 375, 280);
 		ARPCache.add(this.arpTable);
+		readARP();
 
 		this.lbIpAddress = new JLabel("IP주소");
 		this.lbIpAddress.setBounds(10, 360, 50, 30);
@@ -146,9 +151,9 @@ public class ARPTableDlg extends JFrame {
 				int temp = arpTable.getSelectedIndex();
 				if (temp >= 0) {
 					boolean result = deleteARP(temp);
-					if(result) {
+					if (result) {
 						arpTable.remove(temp);
-						}
+					}
 				}
 			}
 		});
@@ -161,9 +166,9 @@ public class ARPTableDlg extends JFrame {
 
 			public void actionPerformed(ActionEvent arg0) {
 				boolean result = deleteAllARP();
-				if(result) {
+				if (result) {
 					arpTable.removeAll();
-					}
+				}
 			}
 		});
 		this.ARPAllDelBtn.setBounds(220, 310, 150, 30);
@@ -175,7 +180,7 @@ public class ARPTableDlg extends JFrame {
 
 			public void actionPerformed(ActionEvent arg0) {
 				boolean result = sendIpARP(IpAddress.getText());
-				if(result) {
+				if (result) {
 					IpAddress.setText("");
 				}
 			}
@@ -186,7 +191,8 @@ public class ARPTableDlg extends JFrame {
 		// Proxy ARP Entry Panel과 칸에 해당하는 컴포넌트
 		ProxyARPEntry = new JPanel();
 		ProxyARPEntry.setLayout(null);
-		ProxyARPEntry.setBorder(BorderFactory.createTitledBorder("Proxy ARP Entry"));
+		ProxyARPEntry.setBorder(BorderFactory
+				.createTitledBorder("Proxy ARP Entry"));
 		ProxyARPEntry.setBounds(410, 10, 395, 320);
 
 		this.proxyTable = new List();
@@ -209,9 +215,9 @@ public class ARPTableDlg extends JFrame {
 		this.proxyDelBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				int temp = proxyTable.getSelectedIndex();
-				if(temp>=0) {
+				if (temp >= 0) {
 					boolean result = deleteProxy(temp);
-					if(result) {
+					if (result) {
 						proxyTable.remove(temp);
 					}
 				}
@@ -223,7 +229,8 @@ public class ARPTableDlg extends JFrame {
 		// Gratuitous ARP Panel과 칸에 해당하는 컴포넌트
 		GratuitousARP = new JPanel();
 		GratuitousARP.setLayout(null);
-		GratuitousARP.setBorder(BorderFactory.createTitledBorder("Gratuitous ARP"));
+		GratuitousARP.setBorder(BorderFactory
+				.createTitledBorder("Gratuitous ARP"));
 		GratuitousARP.setBounds(410, 330, 395, 80);
 
 		this.lbMacAddress = new JLabel("H/W 주소");
@@ -278,32 +285,75 @@ public class ARPTableDlg extends JFrame {
 		setVisible(true);
 	}
 
-	
 	// ARP Table 관련 함수
-	public boolean readARP() {			// ARP Table 읽어오기
-		//읽어온 데이터는  this.arpTable.add()를 통해 하나씩 삽입해주세요!
+	public boolean readARP() { // ARP Table 읽어오기
+		System.out.println("-----readARP-----");
+		Iterator<_ARP_CACHE> arp_iterator = ARPLayer.arpTable.ARPTable.iterator();
+		while (arp_iterator.hasNext()) {
+			_ARP_CACHE cache = arp_iterator.next();
+			byte[] ip_add_byte = cache.return_IPAddress();
+			byte[] mac_add_byte = cache.return_MACAddress();
+			String ip_add = "", mac_add = "";
+
+			// print ip address
+			for (int i = 0; i < 4; i++) {
+				if (i == 3)	//마지막 byte인 경우엔 .을 붙이지 않음
+					ip_add += ip_add_byte[i] & 0xFF;
+				else
+					ip_add += ((ip_add_byte[i] & 0xFF) + ".");
+
+			}
+
+			// print mac address
+			for (int i = 0; i < 6; i++) {
+				if (i == 0
+						&& Integer.toHexString(mac_add_byte[i] & 0xFF).toUpperCase().equals("FF")) {	//reply를 받기 전이라 mac주소를 모르는 경우
+					mac_add = "??????";
+					break;
+				}
+				if (i == 5)	//마지막 byte인 경우엔 :를 붙이지 않음
+					mac_add += Integer.toHexString(mac_add_byte[i] & 0xFF).toUpperCase();
+				else
+					mac_add += (Integer.toHexString(mac_add_byte[i] & 0xFF).toUpperCase() + ":");
+			}
+			String status = cache.return_Status() == false ? "incomplete":"complete";	//status를 확인하여 출력
+			this.arpTable.add(ip_add + "     " + mac_add + "     " + status);		//arpTable의 정보를 출력
+		}
 		return false;
 	}
-	
+
 	public boolean deleteARP(int index) { // ARP Table에서 index에 해당하는 원소 하나 삭제
+		ARPLayer.arpTable.ARPTable.remove(index);
+		this.arpTable.remove(index);
+		readARP();
 		return false;
 	}
 
 	public boolean deleteAllARP() { // ARP Table 초기화
-		return false;
-	}
-	public boolean sendIpARP(String ipAddress) {	//Ip Address 전송
+		ARPLayer.arpTable.ARPTable.removeAll(ARPLayer.arpTable.ARPTable);
+		this.arpTable.removeAll();
+		readARP();
 		return false;
 	}
 
-	
-	// ProxyARP Table 관련 함수
-	public boolean readProxy() {			//Proxy Table 읽어오기
-		//읽어온 데이터는 this.proxyTable.add()를 통해 하나씩 삽입해주세요!
+	public boolean sendIpARP(String ipAddress) { // Ip Address 전송
+		//arp test용, 현재 arp기능은 채팅 상에서 구현
 		return false;
 	}
-	
-	public boolean addProxy(String device, String iPAddress, String macAddress) { // Proxy ARP Table 내 새 원소 추가
+
+	// ProxyARP Table 관련 함수
+	public boolean readProxy() { // Proxy Table 읽어오기
+		// 읽어온 데이터는 this.proxyTable.add()를 통해 하나씩 삽입해주세요!
+		return false;
+	}
+
+	public boolean addProxy(String device, String iPAddress, String macAddress) { // Proxy
+																					// ARP
+																					// Table
+																					// 내
+																					// 새
+																					// 원소
+																					// 추가
 		return false;
 	}
 
@@ -311,7 +361,6 @@ public class ARPTableDlg extends JFrame {
 		return false;
 	}
 
-	
 	// GARP Table 관련 함수
 	public boolean sendMacGARP(String macAddress) {
 		/*
@@ -322,12 +371,12 @@ public class ARPTableDlg extends JFrame {
 		 * 
 		 * }
 		 * 
-		 * private byte[] MACStringToByte(String Mac) { byte[] result = new byte[6];
-		 * StringTokenizer tokens = new StringTokenizer(Mac, "-"); for(int i = 0;
-		 * tokens.hasMoreElements(); i++) { String temp = tokens.nextToken(); try {
-		 * result[i] = Byte.parseByte(temp, 16); } catch(NumberFormatException e) { int
-		 * error = (Integer.parseInt(temp, 16)) - 256; result[i] = (byte) (error); } }
-		 * return result;
+		 * private byte[] MACStringToByte(String Mac) { byte[] result = new
+		 * byte[6]; StringTokenizer tokens = new StringTokenizer(Mac, "-");
+		 * for(int i = 0; tokens.hasMoreElements(); i++) { String temp =
+		 * tokens.nextToken(); try { result[i] = Byte.parseByte(temp, 16); }
+		 * catch(NumberFormatException e) { int error = (Integer.parseInt(temp,
+		 * 16)) - 256; result[i] = (byte) (error); } } return result;
 		 */
 		return false;
 	}

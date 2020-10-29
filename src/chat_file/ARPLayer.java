@@ -28,12 +28,12 @@ public class ARPLayer implements BaseLayer{
 		byte[] DstMac = new byte[6];
 		byte[] DstIP = new byte[4];
 		
-		// ��ƿ��Ƽ�� �ش��ϴ� �κе��� �����ڷ� �����־���.
+		// 占쏙옙틸占쏙옙티占쏙옙 占쌔댐옙占싹댐옙 占싸분듸옙占쏙옙 占쏙옙占쏙옙占쌘뤄옙 占쏙옙占쏙옙占쌍억옙占쏙옙.
 		public _ARP_HEADER() {
-			this.HardwareType[1] = (byte)0x01;	// 0x0001 --> Ethernet ��� �� �׻� 1�� ����
+			this.HardwareType[1] = (byte)0x01;	// 0x0001 --> Ethernet 占쏙옙占� 占쏙옙 占쌓삼옙 1占쏙옙 占쏙옙占쏙옙
 			this.ProtocolType[0] = (byte)0x08;	// 0x0800 (IPv4) 0x0806 (ARP)
-			this.HardwareLength[0] = (byte)0x06;	// Ethernet������ 0x06���� �����Ϸ� �� ������ ���󤾤�
-			this.ProtocolLength[0] = (byte)0x04;	// IPv4�� ��� 0x04�� ����
+			this.HardwareLength[0] = (byte)0x06;	// Ethernet占쏙옙占쏙옙占쏙옙 0x06占쏙옙占쏙옙 占쏙옙占쏙옙占싹뤄옙 占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏢ㅎㅿ옙
+			this.ProtocolLength[0] = (byte)0x04;	// IPv4占쏙옙 占쏙옙占� 0x04占쏙옙 占쏙옙占쏙옙
 			this.DstMac[0] = (byte)0xff;
 			this.DstMac[1] = (byte)0xff;
 			this.DstMac[2] = (byte)0xff;
@@ -64,7 +64,7 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	 
-	_ARP_HEADER arpheader = new _ARP_HEADER();	//����? ����? ���� --> ��ư Receive �Լ����� �޴� input�� ���� �� �ʿ�
+	_ARP_HEADER arpheader = new _ARP_HEADER();	//占쏙옙占쏙옙? 占쏙옙占쏙옙? 占쏙옙占쏙옙 --> 占쏙옙튼 Receive 占쌉쇽옙占쏙옙占쏙옙 占쌨댐옙 input占쏙옙 占쏙옙占쏙옙 占쏙옙 占십울옙
 	
 	public void setSrcMac(byte[] srcmac) {
 		arpheader.setSrcMac(srcmac);
@@ -109,7 +109,7 @@ public class ARPLayer implements BaseLayer{
 			return this;
 		}
 		
-		//�񱳸� �ϱ� ���� ���� �������ִ� �Լ���
+		//return ip, mac address in the Arp_cache
 		public byte[] return_IPAddress() {
 			return this.IPAddress;
 		}
@@ -151,7 +151,7 @@ public class ARPLayer implements BaseLayer{
 			return this;
 		}
 		
-		//�񱳸� �ϱ� ���� ���� �������ִ� �Լ���
+		//return ip, mac address in the proxyArp_cache
 		public byte[] return_IPAddress() {
 			return this.IPAddress;
 		}
@@ -183,8 +183,9 @@ public class ARPLayer implements BaseLayer{
 		}
 	}
 	
-	_ARP_TABLE arpTable = new _ARP_TABLE();
-	_PROXYARP_TABLE proxyarpTable = new _PROXYARP_TABLE();
+	//ARPTableDlg에서의 접근을 위해 static으로 선언
+	static _ARP_TABLE arpTable = new _ARP_TABLE();	
+	static _PROXYARP_TABLE proxyarpTable = new _PROXYARP_TABLE();
 	
 	public byte[] ObjToByte(_ARP_HEADER Header, byte[] input, int length) {
 		byte[] buf = new byte[length + 28];	//2, 2, 1, 1, 2, 6, 4, 6, 4 => 28
@@ -209,7 +210,7 @@ public class ARPLayer implements BaseLayer{
 		if (dstAddress != null) {
 			System.out.println("dstAddress Know");
 			this.GetUnderLayer().SetEnetDstAddress(dstAddress);	//Ethernet Layer SetEnetDstAddress Method
-			//arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2�� ���� �ʱ� ����
+			//arpheader.setOpcode(new byte[] {0x00, 0x05});		//1,2占쏙옙 占쏙옙占쏙옙 占십깍옙 占쏙옙占쏙옙
 			arpheader.setDstMac(dstAddress);
 			
 			this.GetUnderLayer().Send(input, length);
@@ -243,7 +244,7 @@ public class ARPLayer implements BaseLayer{
 	      return false;
 	   }
 
-	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC �ּҸ� �˰��ִ��� ����� �Լ�
+	private byte[] KnowDstMac(byte[] dstIP) {									//DstMAC이 arpTable에 있는지 확인하는 함수
 		Iterator<_ARP_CACHE> iterator = arpTable.ARPTable.iterator();
 		while (iterator.hasNext()) {
 			_ARP_CACHE cache = iterator.next();
@@ -258,7 +259,7 @@ public class ARPLayer implements BaseLayer{
 		return null;
 	}
 	
-	private byte[] KnowDstMacProxy(byte[] dstIP) {									//DstMAC �ּҸ� �˰��ִ��� ����� �Լ�
+	private byte[] KnowDstMacProxy(byte[] dstIP) {									//DstMAC이 proxyTable에 있는지 확인하는 함수
 		Iterator<_PROXYARP_CACHE> iterator = proxyarpTable.PROXYARPTable.iterator();
 		while (iterator.hasNext()) {
 			_PROXYARP_CACHE cache = iterator.next();
@@ -275,18 +276,18 @@ public class ARPLayer implements BaseLayer{
 		byte[] opcode = new byte[2];
 		System.arraycopy(input, 6, opcode, 0, 2);
 		if(opcode[1] == 1) {	//request
-			/* ��û�ϴ°��� �޾����ϱ� ���� ���� ȣ��Ʈ ���忡���� Sender Mac, Sender IP�� �ñ��� �� �� ����. */
+			/* 占쏙옙청占싹는곤옙占쏙옙 占쌨억옙占쏙옙占싹깍옙 占쏙옙占쏙옙 占쏙옙占쏙옙 호占쏙옙트 占쏙옙占썲에占쏙옙占쏙옙 Sender Mac, Sender IP占쏙옙 占시깍옙占쏙옙 占쏙옙 占쏙옙 占쏙옙占쏙옙. */
 			System.out.println("Request");
 			byte[] senderMAC = new byte[6];
 			byte[] senderIP = new byte[4];
-			byte[] targetIP = new byte[4];	//swap�� ���� ����
+			byte[] targetIP = new byte[4];	//swap占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
 			
 			System.arraycopy(input, 8, senderMAC, 0, 6);
 			System.arraycopy(input, 14, senderIP, 0, 4);
 			System.arraycopy(input, 24, targetIP, 0, 4);
 			
 			
-			if(Arrays.equals(senderIP, targetIP)) {		//GARP�� ���� IP�� �޴� IP�� �����Ƿ�, if������ GARP���� �����ϰ�, drop�Ѵ�.
+			if(Arrays.equals(senderIP, targetIP)) {		//GARP占쏙옙 占쏙옙占쏙옙 IP占쏙옙 占쌨댐옙 IP占쏙옙 占쏙옙占쏙옙占실뤄옙, if占쏙옙占쏙옙占쏙옙 GARP占쏙옙占쏙옙 占쏙옙占쏙옙占싹곤옙, drop占싼댐옙.
 				SetDstTrue(senderIP, senderMAC);
 				return true;
 			}
@@ -294,7 +295,7 @@ public class ARPLayer implements BaseLayer{
 			if(!isInTable(cache)) {
 	            arpTable.ARPTable.add(cache);
 	         }
-			if(Arrays.equals(targetIP, arpheader.SrcIP)) {	//request �޼����� �޾��� �� ������ �� �޼����̸� ��û�� ȣ��Ʈ���� ���� mac �ּҸ� �˷��־����
+			if(Arrays.equals(targetIP, arpheader.SrcIP)) {	//request 占쌨쇽옙占쏙옙占쏙옙 占쌨억옙占쏙옙 占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙 占쌨쇽옙占쏙옙占싱몌옙 占쏙옙청占쏙옙 호占쏙옙트占쏙옙占쏙옙 占쏙옙占쏙옙 mac 占쌍소몌옙 占싯뤄옙占쌍억옙占쏙옙占�
 				System.out.println("reply start!");
 				opcode = new byte[] {0x00, 0x02};
 				System.arraycopy(opcode, 0, input, 6, 2);
@@ -309,8 +310,8 @@ public class ARPLayer implements BaseLayer{
 			}
 				
 		} else {	//opcode[0] == 0x02	reply
-			/* �����ϴ� �޼����� �޾����ϱ� ���� ���� ȣ��Ʈ ���忡����  Sender Mac, Sender IP�� �ñ��� �� �� ����.
-			 * �ֳ�? �װ� �ñ��ؼ� �����ſ����ϱ�
+			/* 占쏙옙占쏙옙占싹댐옙 占쌨쇽옙占쏙옙占쏙옙 占쌨억옙占쏙옙占싹깍옙 占쏙옙占쏙옙 占쏙옙占쏙옙 호占쏙옙트 占쏙옙占썲에占쏙옙占쏙옙  Sender Mac, Sender IP占쏙옙 占시깍옙占쏙옙 占쏙옙 占쏙옙 占쏙옙占쏙옙.
+			 * 占쌍놂옙? 占쌓곤옙 占시깍옙占쌔쇽옙 占쏙옙占쏙옙占신울옙占쏙옙占싹깍옙
 			 * */
 			System.out.println("Reply");
 			byte[] senderMAC = new byte[6];
@@ -348,7 +349,7 @@ public class ARPLayer implements BaseLayer{
 	}
 
 	public byte[] swap(byte[] input, byte[] srcmac, byte[] srcip, byte[] tarmac, byte[] tarip) {
-		input[7] = 0x02; //opcode ���� (opcode reply�� ����)
+		input[7] = 0x02; //opcode 占쏙옙占쏙옙 (opcode reply占쏙옙 占쏙옙占쏙옙)
 		System.arraycopy(srcmac, 0, input, 18, 6);
 		System.arraycopy(srcip, 0, input, 24, 4);
 		System.arraycopy(tarmac, 0, input, 8, 6);
